@@ -2,7 +2,7 @@
 
 {
   imports = [
-    ./homepage.nix
+    # ./homepage.nix
     # ./minecraft.nix
   ];
 
