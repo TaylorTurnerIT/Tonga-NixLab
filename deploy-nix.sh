@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # --- Configuration ---
-TARGET_HOST="root@192.168.1.217"
+TARGET_HOST="homelab" # Aliased in ~/.ssh/config
 FLAKE=".#homelab"
 # ---------------------
 
