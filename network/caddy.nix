@@ -87,32 +87,15 @@ in
         '';
       };
 
-      /*
-      Service:  ProxMenuX (Proxmox Monitor)
-                ProxMenuX is a monitoring dashboard for Proxmox environments.
-                
-                proxmenux.tongatime.us -> http://192.168.1.36:8008
-      */
-      # "proxmenux.${domain}" = {
-      #   useACMEHost = domain;
-      #   extraConfig = ''
-      #     reverse_proxy https://http://192.168.1.36:8008/ {
-      #       transport http {
-      #         tls_insecure_skip_verify # Proxmox uses self-signed certs internally
-      #       }
-      #     }
-      #   '';
-      # };
-
-      /*
-        Service:  Homepage (DEFAULT)
+      /* DEFAULT
+        Service:  Homepage (Dashboard)
                   Homepage dashboard for quick access to services and status.
                   
-                  tongatime.us -> http://localhost:3000
+                  tongatime.us -> https://192.168.1.36:3000
       */
       "${domain}" = {
         useACMEHost = domain;
-        extraConfig = "reverse_proxy localhost:3000";
+        extraConfig = "reverse_proxy https://192.168.1.36:3000";
       };
 
     };
