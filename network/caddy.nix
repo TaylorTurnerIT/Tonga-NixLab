@@ -59,7 +59,7 @@ in
 
     Services:
     - Proxmox Web UI (https://proxmox.tongatime.us)
-    - Dashboard (https://dashboard.tongatime.us)
+    - Dashboard (https://tongatime.us)
   */
 
   services.caddy = {
