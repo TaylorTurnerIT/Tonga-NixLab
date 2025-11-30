@@ -13,7 +13,8 @@ RUN mkdir -p /root/.config/nix && \
 # We install everything ONCE during build
 # These tools will be permanently available in the image
 RUN nix profile add \
-    nixpkgs#nixos-rebuild
+    nixpkgs#nixos-rebuild \
+    github:nix-community/nixos-anywhere # NixOS Anywhere for initial installs
 
 # --- Pre-fetch nixos-anywhere ---
 # nixos-anywhere is used for initial installs

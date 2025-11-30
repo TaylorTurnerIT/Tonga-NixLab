@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 
 # --- Configuration ---
-# Default target if none provided
-DEFAULT_HOST="vps-proxy"
-FLAKE=".#vps-proxy"
+DEFAULT_HOST="vps-gateway"
+FLAKE=".#vps-proxy"   # Ensure this matches your flake output name!
 DEPLOYER_IMAGE="homelab-deployer:latest"
 LOG_DIR="logs"
 # ---------------------
@@ -24,7 +23,7 @@ usage() {
     echo "  --rebuild     Rebuild the deployment container"
     echo ""
     echo "Examples:"
-    echo "  $0                      (Updates vps-proxy)"
+    echo "  $0                      (Updates vps-gateway)"
     echo "  $0 --install 192.0.2.1  (Installs to IP using ubuntu user)"
     exit 1
 }
@@ -54,7 +53,6 @@ if [[ "$1" == "--install" ]]; then
         exit 1
     fi
 elif [[ -n "$1" ]]; then
-    # Assume argument is a hostname/IP if it's not a flag
     TARGET="$1"
 fi
 
@@ -71,7 +69,6 @@ echo "📄 Logging to $LOG_FILE"
 podman run --rm -it \
   --security-opt label=disable \
   -v "$(pwd):/work:Z" \
-  -v "$(pwd)/vps:/work/vps:Z" \
   -v "$HOME/.ssh:/mnt/ssh_keys:ro" \
   -w /work \
   --net=host \
@@ -80,33 +77,29 @@ podman run --rm -it \
   -e FLAKE="$FLAKE" \
   "$DEPLOYER_IMAGE" \
   bash -c "
-    # Setup Writable SSH Environment
+    # 1. Setup Writable SSH Environment
     mkdir -p /root/.ssh
     cp -r /mnt/ssh_keys/* /root/.ssh/ 2>/dev/null || true
     chmod 700 /root/.ssh
     chmod 600 /root/.ssh/* 2>/dev/null || true
     
-    # --- NEW: Configure SSH to use ALL keys found ---
+    # Configure SSH to use ALL keys found (Fix for IdentityFile error)
     echo 'Host $TARGET' >> /root/.ssh/config
     echo '    StrictHostKeyChecking no' >> /root/.ssh/config
     echo '    UserKnownHostsFile /dev/null' >> /root/.ssh/config
+    
     # Loop through keys and add them as IdentityFile
+    # We use \$key to ensure the variable is evaluated INSIDE the container, not on the host
     for key in /root/.ssh/*; do
-        # If it's a file and not a public key/config/known_hosts
-        if [ -f "$key" ] && [[ ! "$key" == *.pub ]] && [[ ! "$key" == *config ]] && [[ ! "$key" == *known_hosts* ]]; then
-             echo "    IdentityFile $key" >> /root/.ssh/config
+        if [ -f \"\$key\" ] && [[ ! \"\$key\" == *.pub ]] && [[ ! \"\$key\" == *config ]] && [[ ! \"\$key\" == *known_hosts* ]]; then
+             echo \"    IdentityFile \$key\" >> /root/.ssh/config
         fi
     done
 
-    # Execute Command (With Retry Loop)
+    # 2. Execute Command (With Retry Loop)
     while true; do
         if [ \"\$MODE\" == \"install\" ]; then
             echo '🔥 Nuking and Installing NixOS on $TARGET...'
-            
-            # Oracle Cloud Specifics: 
-            # - User is usually 'ubuntu'
-            # - Must use --use-remote-sudo because root login is disabled
-            # - --build-on-remote prevents ARM compilation issues if your PC is x86
             
             if nixos-anywhere \
                 --flake \"\$FLAKE\" \
