@@ -36,15 +36,15 @@ sudo loginctl enable-linger "$TARGET_USER"
 
 # Add to trusted-users (with explicit verification)
 echo "🔓 Adding $TARGET_USER to trusted-users..."
-if ! sudo grep -q "trusted-users.*$TARGET_USER" /etc/nix/nix.conf; then
-    echo "trusted-users = root $TARGET_USER" | sudo tee -a /etc/nix/nix.conf
+if ! sudo grep -q "trusted-users.*$TARGET_USER" /etc/nix/nix.custom.conf; then
+    echo "trusted-users = root $TARGET_USER" | sudo tee -a /etc/nix/nix.custom.conf
 else
     echo "✓ $TARGET_USER already in trusted-users"
 fi
 
 # Add require-sigs = false
-if ! sudo grep -q "require-sigs = false" /etc/nix/nix.conf; then
-    echo "require-sigs = false" | sudo tee -a /etc/nix/nix.conf
+if ! sudo grep -q "require-sigs = false" /etc/nix/nix.custom.conf; then
+    echo "require-sigs = false" | sudo tee -a /etc/nix/nix.custom.conf
 else
     echo "✓ require-sigs already set to false"
 fi
@@ -56,7 +56,7 @@ sleep 3
 
 # Verify configuration was applied
 echo "✓ Verifying configuration..."
-sudo cat /etc/nix/nix.conf | grep -E "(trusted-users|require-sigs)" || echo "⚠️  Warning: config lines not found"
+sudo cat /etc/nix/nix.custom.conf | grep -E "(trusted-users|require-sigs)" || echo "⚠️  Warning: config lines not found"
 
 # Swap Configuration
 if [ ! -f /swapfile ]; then
