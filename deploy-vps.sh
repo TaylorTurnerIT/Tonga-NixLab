@@ -2,7 +2,7 @@
 
 TARGET_HOST="129.153.13.212"
 TARGET_USER="ubuntu"
-# FIX: Explicitly point to the homeConfiguration output
+# FIX: Point to the correct Home Manager output
 FLAKE=".#homeConfigurations.ubuntu"
 SSH_KEY_NAME="homelab"
 DEPLOYER_IMAGE="homelab-deployer:latest"
@@ -50,13 +50,13 @@ podman run --rm -it \
         \$SSH_CMD \"curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install --no-confirm\"
     fi
 
-    # CRITICAL: Enable lingering so services run after disconnect
+    # CRITICAL FIX: Use sudo for loginctl
     echo '⏳ Enabling Systemd Lingering...'
-    \$SSH_CMD \"loginctl enable-linger $TARGET_USER\"
+    \$SSH_CMD \"sudo loginctl enable-linger $TARGET_USER\"
 
     # --- 2. Build Configuration ---
     echo '🔨 Building Home Manager configuration...'
-    # FIX: Build the specific activation package
+    # Build the specific activation package
     DRV=\$(nix build --no-link --print-out-paths \"\${FLAKE}.activationPackage\" --extra-experimental-features 'nix-command flakes')
     
     if [ -z \"\$DRV\" ]; then
