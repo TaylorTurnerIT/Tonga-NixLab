@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
 # --- Configuration ---
-DEFAULT_HOST="vps-proxy"
-FLAKE=".#vps-proxy"   # Ensure this matches your flake output name!
+DEFAULT_HOST="vps-gateway"
+FLAKE=".#vps-proxy"
 DEPLOYER_IMAGE="homelab-deployer:latest"
 LOG_DIR="logs"
+SSH_KEY_NAME="homelab"  # <--- NEW: Define your specific key here
 # ---------------------
 
 set -e
@@ -13,6 +14,15 @@ set -e
 mkdir -p "$LOG_DIR"
 TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
 LOG_FILE="$LOG_DIR/deploy_vps_$TIMESTAMP.log"
+
+# --- NEW: Check for SSH Key locally before starting ---
+if [[ ! -f "$HOME/.ssh/$SSH_KEY_NAME" ]]; then
+    echo "❌ CRITICAL ERROR: SSH Key '$HOME/.ssh/$SSH_KEY_NAME' not found!"
+    echo "   The deployment container needs this specific key to connect."
+    echo "   Please verify the key exists or update SSH_KEY_NAME in this script."
+    exit 1
+fi
+# ------------------------------------------------------
 
 # Function to print usage
 usage() {
@@ -75,33 +85,23 @@ podman run --rm -it \
   -e MODE="$MODE" \
   -e TARGET="$TARGET" \
   -e FLAKE="$FLAKE" \
+  -e SSH_KEY_NAME="$SSH_KEY_NAME" \
   "$DEPLOYER_IMAGE" \
   bash -c "
-    # Setup Writable SSH Environment
+    # 1. Setup Writable SSH Environment
     mkdir -p /root/.ssh
     cp -r /mnt/ssh_keys/* /root/.ssh/ 2>/dev/null || true
     chmod 700 /root/.ssh
     chmod 600 /root/.ssh/* 2>/dev/null || true
     
-    # Configure SSH Config
+    # Configure SSH to use SPECIFIC key
     echo 'Host $TARGET' >> /root/.ssh/config
     echo '    StrictHostKeyChecking no' >> /root/.ssh/config
     echo '    UserKnownHostsFile /dev/null' >> /root/.ssh/config
+    # Explicitly add the key passed from the host script
+    echo '    IdentityFile /root/.ssh/$SSH_KEY_NAME' >> /root/.ssh/config
 
-    if [[ -n \"\$SSH_KEY_NAME\" ]] && [[ -f \"/root/.ssh/\$SSH_KEY_NAME\" ]]; then
-        # OPTION A: User specified a key. Use ONLY that key.
-        echo \"    IdentityFile /root/.ssh/\$SSH_KEY_NAME\" >> /root/.ssh/config
-        echo \"    IdentitiesOnly yes\" >> /root/.ssh/config
-    else
-        # OPTION B: Try all keys (Fallback)
-        for key in /root/.ssh/*; do
-            if [ -f \"\$key\" ] && [[ ! \"\$key\" == *.pub ]] && [[ ! \"\$key\" == *config ]] && [[ ! \"\$key\" == *known_hosts* ]]; then
-                 echo \"    IdentityFile \$key\" >> /root/.ssh/config
-            fi
-        done
-    fi
-
-    # Execute Command (With Retry Loop)
+    # 2. Execute Command (With Retry Loop)
     while true; do
         if [ \"\$MODE\" == \"install\" ]; then
             echo '🔥 Nuking and Installing NixOS on $TARGET...'
