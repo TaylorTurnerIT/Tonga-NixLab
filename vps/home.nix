@@ -3,8 +3,8 @@
 let
   # Define the package with the Layer 4 plugin
   caddyPackage = pkgs-unstable.caddy.withPlugins {
-    plugins = [ "github.com/mholt/caddy-l4" ];
-    hash = "sha256-k1eU+rOq3uvy6t9qKCXw0C514X447F0e8q0XsswF9X8="; 
+      plugins = [ "github.com/mholt/caddy-l4@v0.0.0-20251124224044-66170bec9f4d" ];
+      hash = "sha256-g3Ca24Boxb9VkSCrNvy1+n5Dfd2n4qEpi2bIOxyNc6g="; 
   };
 
   # Define the Caddyfile content
