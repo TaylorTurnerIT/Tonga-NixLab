@@ -80,18 +80,25 @@ podman run --rm -it \
   -e FLAKE="$FLAKE" \
   "$DEPLOYER_IMAGE" \
   bash -c "
-    # 1. Setup Writable SSH Environment
+    # Setup Writable SSH Environment
     mkdir -p /root/.ssh
     cp -r /mnt/ssh_keys/* /root/.ssh/ 2>/dev/null || true
     chmod 700 /root/.ssh
     chmod 600 /root/.ssh/* 2>/dev/null || true
     
-    # Disable Host Key Checking for the VPS (ips change often)
+    # --- NEW: Configure SSH to use ALL keys found ---
     echo 'Host $TARGET' >> /root/.ssh/config
     echo '    StrictHostKeyChecking no' >> /root/.ssh/config
     echo '    UserKnownHostsFile /dev/null' >> /root/.ssh/config
+    # Loop through keys and add them as IdentityFile
+    for key in /root/.ssh/*; do
+        # If it's a file and not a public key/config/known_hosts
+        if [ -f "$key" ] && [[ ! "$key" == *.pub ]] && [[ ! "$key" == *config ]] && [[ ! "$key" == *known_hosts* ]]; then
+             echo "    IdentityFile $key" >> /root/.ssh/config
+        fi
+    done
 
-    # 2. Execute Command (With Retry Loop)
+    # Execute Command (With Retry Loop)
     while true; do
         if [ \"\$MODE\" == \"install\" ]; then
             echo '🔥 Nuking and Installing NixOS on $TARGET...'
