@@ -2,7 +2,7 @@
 
 let
   caddyPackage = pkgs-unstable.caddy.withPlugins {
-    plugins = [ "github.com/mholt/caddy-l4" ];
+    plugins = [ "github.com/mholt/caddy-l4@v0.0.0-20251124224044-66170bec9f4d" ];
     hash = "sha256-k1eU+rOq3uvy6t9qKCXw0C514X447F0e8q0XsswF9X8="; 
   };
 
