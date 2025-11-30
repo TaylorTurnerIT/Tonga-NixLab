@@ -35,10 +35,12 @@ podman run --rm -it \
     chmod 700 /root/.ssh
     chmod 600 /root/.ssh/* 2>/dev/null || true
     
-    echo 'Host $TARGET_HOST' >> /root/.ssh/config
-    echo '    StrictHostKeyChecking no' >> /root/.ssh/config
-    echo '    UserKnownHostsFile /dev/null' >> /root/.ssh/config
-    echo '    IdentityFile /root/.ssh/$SSH_KEY_NAME' >> /root/.ssh/config
+    cat >> /root/.ssh/config <<EOF
+Host $TARGET_HOST
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
+    IdentityFile /root/.ssh/$SSH_KEY_NAME
+EOF
 
     SSH_CMD=\"ssh -i /root/.ssh/$SSH_KEY_NAME $TARGET_USER@$TARGET_HOST\"
 
@@ -58,16 +60,20 @@ podman run --rm -it \
         sudo loginctl enable-linger $TARGET_USER
 
         # 2. Fix 'Lacks Signature' Error
-        # We append the config if missing
         if ! grep -q 'trusted-users = root $TARGET_USER' /etc/nix/nix.conf; then
             echo '🔓 Adding $TARGET_USER to trusted-users...'
             echo 'trusted-users = root $TARGET_USER' | sudo tee -a /etc/nix/nix.conf
         fi
 
-        # CRITICAL FIX: Always restart daemon to ensure config is loaded
-        # (Even if the line already existed from a previous run)
+        # Also disable require-sigs for smoother deployments
+        if ! grep -q 'require-sigs = false' /etc/nix/nix.conf; then
+            echo 'require-sigs = false' | sudo tee -a /etc/nix/nix.conf
+        fi
+
+        # CRITICAL: Restart daemon to ensure config is loaded
         echo '🔄 Restarting Nix Daemon...'
         sudo systemctl restart nix-daemon
+        sleep 2  # Give daemon time to restart
 
         # 3. Swap Configuration
         if [ ! -f /swapfile ]; then
@@ -96,9 +102,12 @@ podman run --rm -it \
     echo \"✅ Build successful: \$DRV\"
 
     # --- 4. Copy & Activate ---
-    echo 'Ns Copying closure to remote...'
+    echo '📦 Copying closure to remote...'
     export NIX_SSHOPTS=\"-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i /root/.ssh/$SSH_KEY_NAME\"
-    nix copy --to \"ssh://$TARGET_USER@$TARGET_HOST\" \"\$DRV\" --extra-experimental-features 'nix-command flakes'
+    nix copy --to \"ssh://$TARGET_USER@$TARGET_HOST\" \\
+      --option require-sigs false \\
+      \"\$DRV\" \\
+      --extra-experimental-features 'nix-command flakes'
 
     echo '🔄 Activating configuration...'
     \$SSH_CMD \"\$DRV/activate\"
