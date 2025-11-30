@@ -1,15 +1,20 @@
 {
-  description = "Proxmox Homelab Server";
+  description = "Proxmox Homelab & VPS";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11"; # Stable NixOS release
-    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable"; # For latest packages if needed
-    disko.url = "github:nix-community/disko"; # Disk partitioning module
-    disko.inputs.nixpkgs.follows = "nixpkgs"; # Ensure disko uses the same nixpkgs
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";
+    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
+    
+    # Add Home Manager
+    home-manager.url = "github:nix-community/home-manager/release-24.11";
+    home-manager.inputs.nixpkgs.follows = "nixpkgs";
+
+    disko.url = "github:nix-community/disko";
+    disko.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, nixpkgs-unstable, disko, ... }: {
-    # Homelab Server Configuration
+  outputs = { self, nixpkgs, nixpkgs-unstable, home-manager, disko, ... }: {
+    # --- YOUR HOME SERVER (Keep this!) ---
     nixosConfigurations.homelab = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       modules = [
@@ -17,22 +22,25 @@
         ./disko-config.nix
         ./configuration.nix
       ];
-    };    
+    };
 
-    # Oracle VPS Proxy Configuration
-    nixosConfigurations.vps-proxy = nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
-      specialArgs = { # Provide access to unstable packages
+    # --- NEW: UBUNTU VPS CONFIGURATION ---
+    homeConfigurations."ubuntu" = home-manager.lib.homeManagerConfiguration {
+      # The VPS is x86_64 (AMD/Intel)
+      pkgs = import nixpkgs { 
+        system = "x86_64-linux"; 
+        config.allowUnfree = true; 
+      };
+      
+      # Pass unstable for the Caddy build
+      extraSpecialArgs = {
         pkgs-unstable = import nixpkgs-unstable {
           system = "x86_64-linux";
           config.allowUnfree = true;
         };
       };
-      modules = [
-        disko.nixosModules.disko
-        ./vps/disko.nix
-        ./vps/configuration.nix
-      ];
+
+      modules = [ ./vps/home.nix ];
     };
   };
 }
