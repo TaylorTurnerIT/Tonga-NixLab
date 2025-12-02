@@ -54,6 +54,8 @@
     neofetch
     ];
 
+  # --- NIX SETTINGS ---
+  nix.settings.download-buffer-size = 524288000; # 500MiB
   # Don't touch
   system.stateVersion = "25.05"; 
 }
