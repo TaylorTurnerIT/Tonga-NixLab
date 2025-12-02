@@ -14,3 +14,5 @@
 - [ ] **Setup NAS on homelab**
 
 - [ ] **Migrate all volumes to NAS**
+
+- [ ] **Setup Jellyfin**
