@@ -9,7 +9,7 @@
   */
   imports = [
     # ./homepage.nix
-    # ./minecraft.nix
+    ./minecraft.nix
   ];
 
   # Global Podman Configuration
