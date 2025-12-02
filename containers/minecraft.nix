@@ -53,7 +53,7 @@
         §b▸ §fIs it Tonga Time?§7§o[1.20+]'';
         ICON = "https://icons.iconarchive.com/icons/chrisl21/minecraft/128/Computer-icon.png";
         USE_MEOWICE_FLAGS = "true"; 
-        DIFFICULTY = "2";
+        DIFFICULTY = "2"; # 0=Peaceful, 1=Easy, 2=Normal, 3=Hard
         PVP = "false";
         SPAWN_PROTECTION = "1";
         
