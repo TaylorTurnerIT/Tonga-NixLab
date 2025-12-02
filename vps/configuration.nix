@@ -99,5 +99,6 @@
     '';
   };
   
+  nix.settings.download-buffer-size = 524288000; # 500MiB
   system.stateVersion = "24.11";
 }
