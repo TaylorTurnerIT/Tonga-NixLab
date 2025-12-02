@@ -69,7 +69,7 @@ Services are defined in Nix, ensuring that `rebuild switch` brings the system to
   * **Reverse Proxy:** Caddy handles internal HTTPS with automatic ACME DNS challenges via Cloudflare, enabling wildcard certs (`*.tongatime.us`) without opening ports.
 
 ### 🚀 Reproducible Deployment Environment
-> *It Works On My Machine - Everyone*
+> It works on my machine! - Everyone
 
 To solve the "it works on my machine" problem for deployment, the deployer itself is containerized.
 
