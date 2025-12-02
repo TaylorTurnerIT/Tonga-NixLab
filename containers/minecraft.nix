@@ -24,7 +24,7 @@
                 - USE_MEOWICE_FLAGS: Enables custom performance flags for better performance.
                 - DIFFICULTY, PVP, SPAWN_PROTECTION: Configures game settings.
                 - OPS and WHITELIST: Sets up server operators and whitelist for player access.
-                - RCON_CMDS: Commands to run at various server events for world pre-generation.
+                - RCON: Enables remote console access.
 
             Reference:
             https://setupmc.com/java-server/
@@ -61,6 +61,9 @@
         OPS = "NVMGamer";
         ENABLE_WHITELIST = "true";
         WHITELIST = "NVMGamer";
+
+        # RCON
+        ENABLE_RCON = "true";
         };
     };
 
