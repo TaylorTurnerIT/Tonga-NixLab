@@ -109,7 +109,7 @@ To solve the "it works on my machine" problem for deployment, the deployer itsel
 
   * Podman installed on your local machine.
   * SSH access to target hosts.
-  * A `secrets/` directory (ignored by git) containing API tokens.
+  * A `secrets/` directory (ignored by git) containing API tokens and private SSH keys.
 
 ### 1\. The Deployer
 
