@@ -49,8 +49,7 @@
         EULA = "TRUE";
         MEMORY = "6G";
         MAX_PLAYERS = "8";
-        MOTD = ''§6✦ §l§6TONGA§eTIME§r §6✦ §r§7tongatime.us
-        §b▸ §fIs it Tonga Time?§7§o[1.20+]'';
+        MOTD = ''§6✦ §l§6TONGA§eTIME§r §6✦ §r§7tongatime.us\n§7§o [1.20+]  §b▸ §fIs it Tonga Time?'';
         ICON = "https://icons.iconarchive.com/icons/chrisl21/minecraft/128/Computer-icon.png";
         USE_MEOWICE_FLAGS = "true"; 
         DIFFICULTY = "2"; # 0=Peaceful, 1=Easy, 2=Normal, 3=Hard
