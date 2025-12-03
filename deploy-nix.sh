@@ -4,6 +4,7 @@
 TARGET_HOST="homelab" 
 FLAKE=".#homelab"
 DEPLOYER_IMAGE="homelab-deployer:latest"
+CACHE_VOLUME="nix-cache"
 # ---------------------
 
 set -e
@@ -47,10 +48,17 @@ if ! podman image exists "$DEPLOYER_IMAGE"; then
     podman build -t "$DEPLOYER_IMAGE" -f Containerfile .
 fi
 
+# Ensure the cache volume exists. If not, create it.
+if ! podman volume inspect "$CACHE_VOLUME" >/dev/null 2>&1; then
+    echo "📦 Creating persistent Nix cache volume ($CACHE_VOLUME)..."
+    podman volume create "$CACHE_VOLUME"
+fi
+
 echo "🚀 Starting Deployment (using $DEPLOYER_IMAGE)..."
 
 podman run --rm -it \
   --security-opt label=disable \
+  -v "$CACHE_VOLUME:/nix" \ 
   -v "$(pwd):/work:Z" \
   -v "$HOME/.ssh:/mnt/ssh_keys:ro" \
   -w /work \

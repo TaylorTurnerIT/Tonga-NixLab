@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
 
+# --- Configuration ---
 TARGET_HOST="129.153.13.212"
 TARGET_USER="ubuntu"
 FLAKE=".#homeConfigurations.ubuntu"
 SSH_KEY_NAME="homelab"
 DEPLOYER_IMAGE="homelab-deployer:latest"
+CACHE_VOLUME="nix-cache"
+# ---------------------
 
 set -e
 
@@ -77,9 +80,15 @@ BOOTSTRAP_EOF
 
 chmod +x "$BOOTSTRAP_SCRIPT"
 
+if ! podman volume inspect "$CACHE_VOLUME" >/dev/null 2>&1; then
+    echo "📦 Creating persistent Nix cache volume ($CACHE_VOLUME)..."
+    podman volume create "$CACHE_VOLUME"
+fi
+
 # Run the deployer container
 podman run --rm -it \
   --security-opt label=disable \
+  -v "$CACHE_VOLUME:/nix" \
   -v "$(pwd):/work:Z" \
   -v "$HOME/.ssh:/mnt/ssh_keys:ro" \
   -v "$BOOTSTRAP_SCRIPT:/mnt/bootstrap.sh:ro" \
