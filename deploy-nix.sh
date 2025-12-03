@@ -58,7 +58,7 @@ echo "🚀 Starting Deployment (using $DEPLOYER_IMAGE)..."
 
 podman run --rm -it \
   --security-opt label=disable \
-  -v "$CACHE_VOLUME:/nix" \ 
+  -v "$CACHE_VOLUME:/nix" \
   -v "$(pwd):/work:Z" \
   -v "$HOME/.ssh:/mnt/ssh_keys:ro" \
   -w /work \
