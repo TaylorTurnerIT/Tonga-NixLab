@@ -57,4 +57,10 @@ in
   };
 
   programs.home-manager.enable = true;
+
+  sops = {
+      age.keyFile = "/home/ubuntu/.config/sops/age/keys.txt";
+      defaultSopsFile = ../secrets/secrets.yaml;
+      secrets.cloudflare_token = { }; 
+    };
 }

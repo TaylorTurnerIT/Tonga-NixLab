@@ -4,6 +4,8 @@ creation_rules:
     key_groups:
     - age:
       # Admin Public Key 
-      - age1watmc0wu93y0k8psn4w3nwj5k05l4qf2yzxnqmjq9ccgd2r0aawq5u5ckr
-      # Homelab Server Public Key
+      - age1ehfkxk8ch4uqx5gqtsy0550c8vusjy95e5xtqq78ns450fdgm9css4xwjd
+      # Homelab Public Key
       - age1vpgcwnl8u4x44ksx4l0ma72ytms04usg7xgmgyeaz0y44ha46pnsp8uvlg
+      # VPS Public Key
+      - age1dm0nnn2gy9k9tenz8dgfz3l2rv4qm74ggs7gkwgata0ulgdxzgzq79mqtc
