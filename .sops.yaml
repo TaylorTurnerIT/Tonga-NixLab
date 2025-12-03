@@ -1,0 +1,9 @@
+# .sops.yaml
+creation_rules:
+  - path_regex: secrets/.*\.yaml$
+    key_groups:
+    - age:
+      # Admin Public Key 
+      - age1watmc0wu93y0k8psn4w3nwj5k05l4qf2yzxnqmjq9ccgd2r0aawq5u5ckr
+      # Homelab Server Public Key
+      - age1vpgcwnl8u4x44ksx4l0ma72ytms04usg7xgmgyeaz0y44ha46pnsp8uvlg
