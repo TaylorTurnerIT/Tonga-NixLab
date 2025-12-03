@@ -11,20 +11,25 @@
 
     disko.url = "github:nix-community/disko";
     disko.inputs.nixpkgs.follows = "nixpkgs";
+
+    # Add sops-nix for managing secrets
+    sops-nix.url = "github:Mic92/sops-nix";
+    sops-nix.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, nixpkgs-unstable, home-manager, disko, ... }: {
-    # --- YOUR HOME SERVER (Keep this!) ---
+  outputs = { self, nixpkgs, nixpkgs-unstable, home-manager, disko, sops-nix, ... }: {
+    # --- HOME SERVER ---
     nixosConfigurations.homelab = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       modules = [
         disko.nixosModules.disko
         ./disko-config.nix
         ./configuration.nix
+        sops-nix.nixosModules.sops
       ];
     };
 
-    # --- NEW: UBUNTU VPS CONFIGURATION ---
+    # --- UBUNTU VPS CONFIGURATION ---
     homeConfigurations."ubuntu" = home-manager.lib.homeManagerConfiguration {
       # The VPS is x86_64 (AMD/Intel)
       pkgs = import nixpkgs { 
@@ -40,7 +45,10 @@
         };
       };
 
-      modules = [ ./vps/home.nix ];
+      modules = [ 
+        ./vps/home.nix
+        sops-nix.homeManagerModules.sops 
+        ];
     };
   };
 }
