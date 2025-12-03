@@ -6,6 +6,8 @@
 - [ ] **Declarative DNS**
       Replace manual cloudflare DNS configuration with declarative configuration
 
+- [ ] **Setup Gitea + Gitea Mirror**
+
 - [ ] **Auto-deploy changes with CI/CD**
       Replace all manual deployment scripts with an automatic deployment pipeline that minimizes downtime while pushing changes rapidly.
 
