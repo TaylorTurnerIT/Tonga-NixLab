@@ -38,3 +38,5 @@
 
 # Allow SOPS config
 !.sops.yaml
+!secrets/
+!secrets/*.yaml
