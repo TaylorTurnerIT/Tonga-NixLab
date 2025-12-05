@@ -1,13 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-# --- Configuration ---
 DEPLOYER_IMAGE="homelab-deployer:latest"
-SECRETS_FILE="secrets/secrets.yaml"
-ZONES_FILE="network/dns_zones.enc.yaml"
-# ---------------------
-
-echo "🚀 Starting DNS Deployment..."
 
 # Check for Deployer Image
 if ! podman image exists "$DEPLOYER_IMAGE"; then
@@ -15,47 +9,42 @@ if ! podman image exists "$DEPLOYER_IMAGE"; then
     exit 1
 fi
 
-# Extract Cloudflare Token (On Host)
-echo "🔓 Decrypting Cloudflare Token..."
-# Check if sops is available on host, otherwise warn user
-if command -v sops &> /dev/null; then
-    export CF_TOKEN=$(sops -d --extract '["cloudflare_token"]' "$SECRETS_FILE")
-else
-    echo "❌ 'sops' not found on host. Cannot decrypt token."
-    exit 1
-fi
+echo "🚀 Starting DNS Deployment..."
 
-# Run Container with In-Memory Decryption
+# Run Container
+# We mount the SSH/Age keys so sops works inside the container.
+# We mount the current directory so it can see secrets.yaml and dnsconfig.js.
 podman run --rm -it \
   --security-opt label=disable \
   -v "$(pwd):/work:Z" \
-  -v "$HOME/.ssh:/root/.ssh:ro" \
   -v "$HOME/.config/sops:/root/.config/sops:ro" \
+  -v "$HOME/.ssh:/root/.ssh:ro" \
   -w /work \
-  -e CLOUDFLARE_API_TOKEN="$CF_TOKEN" \
   "$DEPLOYER_IMAGE" \
   bash -c "
     set -e
-    
-    echo '🔓 Decrypting Zones YAML in memory...'
-    # Decrypt YAML -> Convert to JSON -> Store in ENV
-    # This pipeline ensures plaintext never touches the disk
-    export DNS_ZONES_JSON=\$(sops -d \"$ZONES_FILE\" | yq -o=json)
+
+    # Define the 'Magic Command' to fetch credentials
+    # Decrypt secrets.yaml
+    # Use yq to construct the JSON object: { \"cloudflare\": { \"TYPE\": \"...\", \"apitoken\": ... } }
+    # Output as JSON (-o=json)
+    CRED_CMD='!sops -d secrets/secrets.yaml | yq -o=json \"{\\\"cloudflare\\\": {\\\"TYPE\\\": \\\"CLOUDFLAREAPI\\\", \\\"apitoken\\\": .cloudflare_token}}\"'
 
     echo '🔍 Checking Configuration...'
-    dnscontrol check --creds network/creds.json --config network/dnsconfig.js
+    # We pass the command string directly to --creds
+    dnscontrol check --creds \"\$CRED_CMD\" --config network/dnsconfig.js
 
     echo '----------------------------------------'
     echo '🔮 PREVIEWING CHANGES'
     echo '----------------------------------------'
-    dnscontrol preview --creds network/creds.json --config network/dnsconfig.js
+    dnscontrol preview --creds \"\$CRED_CMD\" --config network/dnsconfig.js
 
     echo '----------------------------------------'
     read -p '⚠️  Apply these changes to Cloudflare? (y/N) ' -n 1 -r
     echo
     if [[ \$REPLY =~ ^[Yy]$ ]]; then
         echo '🚀 Pushing changes...'
-        dnscontrol push --creds network/creds.json --config network/dnsconfig.js
+        dnscontrol push --creds \"\$CRED_CMD\" --config network/dnsconfig.js
     else
         echo '🚫 Aborted.'
     fi
