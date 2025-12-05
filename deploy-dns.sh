@@ -45,7 +45,7 @@ podman run --rm -it \
     echo '🔮 PREVIEWING CHANGES'
     echo '----------------------------------------'
     # Use sops to inject credentials on-the-fly
-    dnscontrol preview --creds '!sops -d secrets/dns_creds.json' --config network/dnsconfig.js
+    dnscontrol preview --creds !./secrets/cat-creds.sh --config network/dnsconfig.js
 
     # --- 4. CONFIRM & PUSH ---
     echo '----------------------------------------'
@@ -53,7 +53,7 @@ podman run --rm -it \
     echo
     if [[ \$REPLY =~ ^[Yy]$ ]]; then
         echo '🚀 Pushing changes...'
-        dnscontrol push --creds '!sops -d secrets/dns_creds.json' --config network/dnsconfig.js
+        dnscontrol push --creds !./secrets/cat-creds.sh --config network/dnsconfig.js
     else
         echo '🚫 Aborted.'
     fi

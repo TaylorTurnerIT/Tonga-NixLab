@@ -29,6 +29,7 @@
 !Containerfile
 !build-deployer.sh
 !deploy-dns.sh
+!secrets/cat-creds.sh
 
 # Allow VPS proxy deployment script
 !deploy-vps.sh
