@@ -1,0 +1,17 @@
+domains:
+  tongatime.us:
+    registrar: "none"
+    provider: "cloudflare"
+    records:
+      - type: A
+        name: "@"
+        target: "129.153.13.212" # VPS IP
+        proxied: false # "Orange Cloud" off 
+      - type: A
+        name: "mc"
+        target: "129.153.13.212"
+        proxied: false
+      - type: A
+        name: "proxmox"
+        target: "100.73.119.72" # Tailscale IP
+        proxied: false
