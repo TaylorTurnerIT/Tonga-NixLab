@@ -40,3 +40,6 @@
 !.sops.yaml
 !secrets/
 !secrets/*.yaml
+
+# Allow LICENSE
+!LICENSE
