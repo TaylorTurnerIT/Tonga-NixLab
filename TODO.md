@@ -3,7 +3,7 @@
 - [X] **sops-nix**
       Secret management declaratively
 
-- [ ] **Declarative DNS**
+- [X] **Declarative DNS**
       Replace manual cloudflare DNS configuration with declarative configuration
 
 - [ ] **Setup Gitea + Gitea Mirror**
