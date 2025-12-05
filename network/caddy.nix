@@ -88,7 +88,7 @@ in
         Service:  Homepage (Dashboard)
                   Homepage dashboard for quick access to services and status.
                   
-                  tongatime.us -> https://192.168.1.36:3000
+                  tongatime.us -> http://127.0.0.1:3000
       */
       "${domain}" = {
         useACMEHost = domain;

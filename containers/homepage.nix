@@ -32,7 +32,7 @@
                 ];
         # Environment Variables
         environment = {
-                HOMEPAGE_ALLOWED_HOSTS = "tongatime.us";
+                HOMEPAGE_ALLOWED_HOSTS = "www.tongatime.us,tongatime.us,localhost,0.0.0.0";
             };
         };
         systemd.tmpfiles.rules = [
