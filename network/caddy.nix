@@ -95,7 +95,9 @@ in
       */
       "${domain}" = {
         useACMEHost = domain;
-        extraConfig = "reverse_proxy https://192.168.1.36:3000";
+        # We point to localhost (127.0.0.1) because the container is on this machine.
+        # We use http because the container listens on plain http internally.
+        extraConfig = "reverse_proxy http://127.0.0.1:3000";
       };
 
     };
