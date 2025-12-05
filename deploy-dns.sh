@@ -3,9 +3,11 @@ set -e
 
 # --- Configuration ---
 DEPLOYER_IMAGE="homelab-deployer:latest"
+ZONES_YAML="network/dns_zones.yaml"
+ZONES_JSON="network/dns_zones.json"
 # ---------------------
 
-# Check for Deployer Image
+# 1. Check for Deployer Image
 if ! podman image exists "$DEPLOYER_IMAGE"; then
     echo "⚠️  Deployer image not found. Please run ./build-deployer.sh first."
     exit 1
@@ -13,12 +15,8 @@ fi
 
 echo "🚀 Starting DNS Deployment..."
 
-# Run Container
-# We mount:
-# - pwd -> /work
-# - ~/.config/sops -> /root/.config/sops (for keys)
-# - ~/.ssh -> /root/.ssh (for keys)
-
+# 2. Run Container
+# We mount everything needed. The script inside handles the lifecycle of the JSON file.
 podman run --rm -it \
   --security-opt label=disable \
   -v "$(pwd):/work:Z" \
@@ -28,23 +26,34 @@ podman run --rm -it \
   "$DEPLOYER_IMAGE" \
   bash -c "
     set -e
+    
+    # --- 1. PREPARE ---
+    # Ensure we clean up the JSON file when this script exits (success or failure)
+    trap 'rm -f $ZONES_JSON' EXIT
 
+    echo '📝 Converting YAML to JSON...'
+    # Convert local YAML to temporary JSON artifact
+    # yq-go is installed in the container via Containerfile
+    yq -o=json '$ZONES_YAML' > '$ZONES_JSON'
+
+    # --- 2. CHECK ---
     echo '🔍 Checking Configuration...'
-    # The '!' tells DNSControl to execute the command and parse the output as JSON
-    # 'sops -d' outputs the decrypted JSON directly to stdout
-    dnscontrol check --creds !sops -d secrets/dns_creds.json --config network/dnsconfig.js
+    dnscontrol check --config network/dnsconfig.js
 
+    # --- 3. PREVIEW ---
     echo '----------------------------------------'
     echo '🔮 PREVIEWING CHANGES'
     echo '----------------------------------------'
-    dnscontrol preview --creds !sops -d secrets/dns_creds.json --config network/dnsconfig.js
+    # Use sops to inject credentials on-the-fly
+    dnscontrol preview --creds '!sops -d secrets/dns_creds.json' --config network/dnsconfig.js
 
+    # --- 4. CONFIRM & PUSH ---
     echo '----------------------------------------'
     read -p '⚠️  Apply these changes to Cloudflare? (y/N) ' -n 1 -r
     echo
     if [[ \$REPLY =~ ^[Yy]$ ]]; then
         echo '🚀 Pushing changes...'
-        dnscontrol push --creds !sops -d secrets/dns_creds.json --config network/dnsconfig.js
+        dnscontrol push --creds '!sops -d secrets/dns_creds.json' --config network/dnsconfig.js
     else
         echo '🚫 Aborted.'
     fi
