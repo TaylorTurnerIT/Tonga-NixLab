@@ -16,7 +16,9 @@
 - [ ] **Migrate off of Forge-VTT**
       Create an automated pipeline to migrate a game and give it a dedicated subdomain 
 
-- [ ] **Setup Homepage**
+- [X] **Setup Homepage**
+
+- [ ] **Convert Homepage yaml to declarative**
 
 - [ ] **Setup NAS on homelab**
 
