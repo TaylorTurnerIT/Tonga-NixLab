@@ -29,14 +29,16 @@
         # Persistent Storage
         volumes = [
                 "/var/lib/homepage:/app/config"
+                "/var/run/podman/podman.sock:/var/run/docker.sock:ro"
                 ];
         # Environment Variables
         environment = {
-                HOMEPAGE_ALLOWED_HOSTS = "www.tongatime.us,tongatime.us,localhost,0.0.0.0";
+                HOMEPAGE_ALLOWED_HOSTS = "tongatime.us";
             };
         };
         systemd.tmpfiles.rules = [
                 "d /var/lib/homepage 0755 1000 100 10d"
+                
         ];
 }
 
