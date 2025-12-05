@@ -32,19 +32,19 @@ podman run --rm -it \
     echo '🔍 Checking Configuration...'
     # The '!' tells DNSControl to execute the command and parse the output as JSON
     # 'sops -d' outputs the decrypted JSON directly to stdout
-    dnscontrol check --creds '!sops -d secrets/dns_creds.json' --config network/dnsconfig.js
+    dnscontrol check --creds !sops -d secrets/dns_creds.json --config network/dnsconfig.js
 
     echo '----------------------------------------'
     echo '🔮 PREVIEWING CHANGES'
     echo '----------------------------------------'
-    dnscontrol preview --creds '!sops -d secrets/dns_creds.json' --config network/dnsconfig.js
+    dnscontrol preview --creds !sops -d secrets/dns_creds.json --config network/dnsconfig.js
 
     echo '----------------------------------------'
     read -p '⚠️  Apply these changes to Cloudflare? (y/N) ' -n 1 -r
     echo
     if [[ \$REPLY =~ ^[Yy]$ ]]; then
         echo '🚀 Pushing changes...'
-        dnscontrol push --creds '!sops -d secrets/dns_creds.json' --config network/dnsconfig.js
+        dnscontrol push --creds !sops -d secrets/dns_creds.json --config network/dnsconfig.js
     else
         echo '🚫 Aborted.'
     fi

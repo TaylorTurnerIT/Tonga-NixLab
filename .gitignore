@@ -42,7 +42,8 @@
 # Allow SOPS config
 !.sops.yaml
 !secrets/
-!secrets/*.yaml
+!secrets/secrets.yaml
+!secrets/dns_creds.json
 
 # Allow LICENSE
 !LICENSE
