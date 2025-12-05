@@ -14,7 +14,9 @@ RUN mkdir -p /root/.config/nix && \
 # These tools will be permanently available in the image
 RUN nix profile add \
     nixpkgs#nixos-rebuild \
-    github:nix-community/nixos-anywhere # NixOS Anywhere for initial installs
+    github:nix-community/nixos-anywhere \
+    nixpkgs#dnscontrol \
+    nixpkgs#sops
 
 # --- Pre-fetch nixos-anywhere ---
 # nixos-anywhere is used for initial installs
@@ -22,7 +24,7 @@ RUN nix profile add \
 RUN nix flake metadata github:nix-community/nixos-anywhere --refresh
 
 # --- Configure SSH defaults ---
-# Set up SSH to ignore known_hosts collisions (same as your current script)
+# Set up SSH to ignore known_hosts collisions
 RUN mkdir -p /root/.ssh && \
     echo "StrictHostKeyChecking no" >> /root/.ssh/config && \
     echo "UserKnownHostsFile /dev/null" >> /root/.ssh/config
