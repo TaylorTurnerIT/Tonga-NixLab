@@ -59,3 +59,5 @@
 - [ ] **Implement load balancing on the website to spin up and spin down new containers**
 
 - [ ] **Research projects to practice for the CKA**
+
+- [ ] **Create a centralized game management platform like Molten or ForgeVTT for FoundryVTT**
