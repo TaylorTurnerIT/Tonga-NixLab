@@ -6,6 +6,8 @@
 - [X] **Declarative DNS**
       Replace manual cloudflare DNS configuration with declarative configuration
 
+- [X] **Setup Homepage**
+
 - [ ] **Setup Gitea + Gitea Mirror**
 
 - [ ] **Auto-deploy changes with CI/CD**
@@ -15,8 +17,6 @@
 
 - [ ] **Migrate off of Forge-VTT**
       Create an automated pipeline to migrate a game and give it a dedicated subdomain 
-
-- [X] **Setup Homepage**
 
 - [ ] **Convert Homepage yaml to declarative**
 
