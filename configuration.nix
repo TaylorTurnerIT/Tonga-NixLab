@@ -29,12 +29,18 @@
     };
   };
 
-  # SOPS
+  # --- SOPS Config ---
   sops.defaultSopsFile = ./secrets/secrets.yaml;
   sops.defaultSopsFormat = "yaml";
   sops.age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+
+  # --- SOPS Secrets ---
   sops.secrets.cloudflare_token = {
     owner = "acme";
+  };
+  sops.secrets.minecraft_rcon_password = {
+    # We leave the owner as root because Podman runs as root (for now)
+    owner = "root";
   };
 
   # users.users.nixos.openssh.authorizedKeys.keys = [

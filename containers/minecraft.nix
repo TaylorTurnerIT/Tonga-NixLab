@@ -63,6 +63,7 @@
 
         # RCON
         ENABLE_RCON = "true";
+        RCON_PASSWORD_FILE = "${config.sops.secrets.minecraft_rcon_password.path}";
         };
     };
 
