@@ -42,14 +42,15 @@ let
         # Ensure directory exists
         mkdir -p "$WORK_DIR"
         cd "$WORK_DIR"
-
-        # Clone or Pull the latest source
         if [ -d ".git" ]; then
-            echo "Updating existing repository..."
-            git pull
+            output=$(git pull)
+            # Only build if git pull reported changes or if the image doesn't exist
+            if [[ "$output" != *"Already up to date."* ]] || ! podman image exists foundry-portal:latest; then
+                podman build -t foundry-portal:latest .
+            fi
         else
-            echo "Cloning repository..."
             git clone https://github.com/TaylorTurnerIT/foundry-portal.git .
+            podman build -t foundry-portal:latest .
         fi
 
         # Build the image using Podman
