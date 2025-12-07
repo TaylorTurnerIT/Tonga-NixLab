@@ -54,9 +54,9 @@
   sops.templates."foundry_secrets.json" = {
     content = ''
       {
-        "${config.sops.placeholder.foundry_username}",
-        "${config.sops.placeholder.foundry_password}",
-        "${config.sops.placeholder.foundry_admin_pass}"
+        "FOUNDRY_USERNAME":"${config.sops.placeholder.foundry_username}",
+        "FOUNDRY_PASSWORD":"${config.sops.placeholder.foundry_password}",
+        "FOUNDRY_ADMIN_PASS":"${config.sops.placeholder.foundry_admin_pass}"
       }
     '';
     mode = "0444";
