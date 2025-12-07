@@ -7,9 +7,21 @@ let
         shared_data_mode = false;
         instances = [
             {
-                name = "Genesis";
-                url = "http://100.73.119.72:30000/chef/genesis";
+                name = "Chef's Games";
+                url = "https://foundry.tongatime.us/chef";
             }
+            # {
+            #     name = "Crunch's Games";
+            #     url = "https://foundry.tongatime.us/crunch";
+            # }
+            # {
+            #     name = "ColossusDirge's Games";
+            #     url = "https://foundry.tongatime.us/colossusdirge";
+            # }
+            # {
+            #     name = "Laz's Games";
+            #     url = "https://foundry.tongatime.us/laz";
+            # }
         ];
     };
 
