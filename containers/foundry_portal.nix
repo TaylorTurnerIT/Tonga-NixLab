@@ -88,7 +88,7 @@ let
         */
 
         # Container image
-        image = "daxiongmao87/foundry-portal:latest";
+        image = "foundry-portal:latest";
 
         # Auto start container on boot
         autoStart = true;
