@@ -87,13 +87,15 @@ in
       "foundry.${domain}" = {
         useACMEHost = domain;
         extraConfig = ''
-          # Route 1: Chef's Game (Prefix /chef)
-          # We use 'handle' (not handle_path) so the /chef prefix is passed to Foundry because we set FOUNDRY_ROUTE_PREFIX = "/chef"
+          # Auto-Redirect /chef to /chef/
+          redir /chef /chef/
+
+          # Route Chef's Game
           handle /chef* {
             reverse_proxy http://127.0.0.1:30001
           }
 
-          # Route 2: Default (The Portal)
+          # Default Route (The Portal)
           handle {
             reverse_proxy http://127.0.0.1:5000
           }
