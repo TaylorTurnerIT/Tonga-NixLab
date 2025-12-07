@@ -72,7 +72,7 @@ let
         ];
     };
 
-    sysystemd.services.podman-foundry-portal = {
+    systemd.services.podman-foundry-portal = {
         requires = [ "build-foundry-portal.service" ];
         after = [ "build-foundry-portal.service" ];
     };
