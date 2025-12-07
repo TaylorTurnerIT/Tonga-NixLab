@@ -68,9 +68,6 @@ let
         
         # NETWORK FIX: Use host networking to bypass firewall blocks on port 30000
         extraOptions = [ "--network=host" ];
-        
-        # NO PORTS needed (we are on host network now)
-        # ports = [ "5000:5000" ]; 
 
         volumes = [
             "${configYaml}:/app/config_declarative.yaml:ro"
