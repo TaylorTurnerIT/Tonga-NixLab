@@ -64,33 +64,43 @@ let
         };
     };
     virtualisation.oci-containers.containers.foundry-portal = {
-        image = "foundry-portal:latest";
-        autoStart = true;
-        
-        # NETWORK FIX: Use host networking to bypass firewall blocks on port 30000
-        extraOptions = [ "--network=host" ];
+    image = "foundry-portal:latest";
+    autoStart = true;
+    # NETWORK FIX: Use host networking to bypass firewall blocks on port 30000
+    extraOptions = [ "--network=host" ];
+    volumes = [
+        "${configYaml}:/app/config_declarative.yaml:ro"
+        "${config.sops.secrets.foundry_admin_hash.path}:/run/secrets/foundry_admin_hash:ro"
+        "/var/lib/foundry-portal:/data:rw" 
+    ];
+    # Overwrite startup command to install config
+    # Runtime Injection
+    # 1. Check if persistent config exists in /data. If not, seed it from declarative config.
+    # 2. Symlink /data/config.yaml to /app/config.yaml so the app reads/writes the persistent file.
+    # 3. Python script: Load yaml -> Read secret -> Inject hash -> Save yaml (preserves other data)
+    # 4. Run app
+    cmd = [ 
+        "/bin/sh" 
+        "-c" 
+        ''
+            # Initialize config if it doesn't exist
+            if [ ! -f /data/config.yaml ]; then
+                echo "Initializing config from declarative defaults..."
+                cp /app/config_declarative.yaml /data/config.yaml
+            fi
 
-        volumes = [
-            "${configYaml}:/app/config_declarative.yaml:ro"
-            "${config.sops.secrets.foundry_admin_hash.path}:/run/secrets/foundry_admin_hash:ro"
-            "/var/lib/foundry-portal:/data:rw"
-        ];
+            # Ensure the app uses the persistent file
+            rm -f /app/config.yaml
+            ln -sf /data/config.yaml /app/config.yaml
 
-        # Overwrite startup command to install config
-        # Runtime Injection
-        # 1. Copy config
-        # 2. Python script: Load yaml -> Read secret -> Inject hash -> Save yaml
-        # 3. Run app
-        cmd = [ 
-            "/bin/sh" 
-            "-c" 
-            ''
-                cp /app/config_declarative.yaml /app/config.yaml && \
-                python -c "import yaml; conf=yaml.safe_load(open('/app/config.yaml')); conf['admin_password_hash']=open('/run/secrets/foundry_admin_hash').read().strip(); yaml.dump(conf, open('/app/config.yaml','w'))" && \
-                python -u app.py
-            ''
-        ];
-    };
+            # Inject the secret hash into the persistent config
+            python -c "import yaml; conf=yaml.safe_load(open('/app/config.yaml')); conf['admin_password_hash']=open('/run/secrets/foundry_admin_hash').read().strip(); yaml.dump(conf, open('/app/config.yaml','w'))" && \
+            
+            # Start the application
+            python app.py
+        ''
+    ];
+};
 
     systemd.services.podman-foundry-portal = {
         requires = [ "build-foundry-portal.service" ];
