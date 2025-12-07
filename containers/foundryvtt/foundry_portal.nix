@@ -85,7 +85,7 @@ let
             ''
                 cp /app/config_declarative.yaml /app/config.yaml && \
                 python -c "import yaml; conf=yaml.safe_load(open('/app/config.yaml')); conf['admin_password_hash']=open('/run/secrets/foundry_admin_hash').read().strip(); yaml.dump(conf, open('/app/config.yaml','w'))" && \
-                python app.py
+                python -u app.py
             ''
         ];
     };
