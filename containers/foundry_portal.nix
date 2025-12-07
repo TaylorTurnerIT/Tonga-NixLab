@@ -62,7 +62,7 @@ let
 
             Configuration:
             - Image:
-                - Uses daxiongmao87/foundry-portal:latest from Docker Hub
+                - Uses the image built by the build-foundry-portal service.
             - Ports:
                 - Maps port 5000 on the host to port 5000 in the container.
                 - Host: 5000 <--> Container: 5000
