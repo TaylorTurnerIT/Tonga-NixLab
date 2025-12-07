@@ -87,9 +87,6 @@ in
       "foundry.${domain}" = {
         useACMEHost = domain;
         extraConfig = ''
-          # Auto-Redirect /chef to /chef/
-          redir /chef /chef/
-
           # Route Chef's Game
           handle /chef* {
             reverse_proxy http://127.0.0.1:30001
