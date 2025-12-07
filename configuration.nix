@@ -59,7 +59,7 @@
         "${config.sops.placeholder.foundry_admin_pass}"
       }
     '';
-    owner = "1000"; 
+    mode = "0444";
   };
 
   # users.users.nixos.openssh.authorizedKeys.keys = [
