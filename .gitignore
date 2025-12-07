@@ -17,10 +17,14 @@
 # Allow ALL in the containers folder
 !containers/
 !containers/*.nix
+!containers/foundryvtt/
+!containers/foundryvtt/*.nix
 
 # Allow ALL in the network folder
 !network/
-!network/*.nix
+!network/caddy.nix
+!network/default.nix
+!network/tailscale.nix
 !network/dnsconfig.js
 !network/dns_zones.yaml
 
@@ -34,7 +38,9 @@
 # Allow VPS proxy deployment script
 !deploy-vps.sh
 !vps/
-!vps/*.nix
+!vps/configuration.nix
+!vps/home.nix
+!vps/disko.nix
 
 # Add markdown files
 !TODO.md
