@@ -24,6 +24,8 @@
       "/var/lib/gitea:/data"
       "/etc/timezone:/etc/timezone:ro"
       "/etc/localtime:/etc/localtime:ro"
+      "${config.sops.secrets.gitea_secret_key.path}:/run/secrets/gitea_secret_key:ro"
+      "${config.sops.secrets.github_mirror_token.path}:/run/secrets/github_mirror_token:ro"
     ];
 
     # Environment variables for configuration
@@ -53,12 +55,6 @@
       GITEA__repository__ROOT = "/data/git/repositories";
       GITEA__repository__ENABLE_PUSH_CREATE_USER = "true";
     };
-
-    # Mount secrets from sops
-    extraOptions = [
-      "--secret=gitea_secret_key,type=mount,target=/run/secrets/gitea_secret_key"
-      "--secret=github_mirror_token,type=mount,target=/run/secrets/github_mirror_token"
-    ];
   };
 
   # Create persistent storage directory with correct permissions
