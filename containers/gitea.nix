@@ -19,7 +19,6 @@
     # Port mapping: Host:Container
     ports = [ 
       "3001:3000" # Gitea web interface
-      "2222:22"     # SSH for Git operations
        ];
     
 
@@ -35,11 +34,6 @@
       # User configuration
       USER_UID = "1000";
       USER_GID = "1000";
-
-      # SSH settings
-      GITEA__server__SSH_DOMAIN = "git.tongatime.us";
-      GITEA__server__SSH_PORT = "2222";
-      GITEA__server__SSH_LISTEN_PORT = "22";
 
       # Database
       GITEA__database__DB_TYPE = "sqlite3";
