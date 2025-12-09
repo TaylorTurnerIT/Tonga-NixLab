@@ -27,8 +27,6 @@ let
     auth_enabled: false
     server:
       http_listen_port: 3100
-    limits_config:
-      allow_structured_metadata: false
     common:
       path_prefix: /loki
       storage:
@@ -41,10 +39,10 @@ let
           store: inmemory
     schema_config:
       configs:
-        - from: 2020-10-24
-          store: boltdb-shipper
+        - from: 2024-04-01  # Updated date for the new schema
+          store: tsdb       # CHANGED: Use 'tsdb' instead of 'boltdb-shipper'
           object_store: filesystem
-          schema: v11
+          schema: v13       # CHANGED: Use 'v13' instead of 'v11'
           index:
             prefix: index_
             period: 24h
