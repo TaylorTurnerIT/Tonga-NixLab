@@ -45,10 +45,10 @@
       GITEA__server__ROOT_URL = "https://git.tongatime.us/";
       GITEA__server__HTTP_PORT = "3000";
 
-      # SSH configuration
+      # SSH settings
       GITEA__server__SSH_DOMAIN = "git.tongatime.us";
-      GITEA__server__SSH_PORT = "22";
-      GITEA__server__START_SSH_SERVER = "false";
+      GITEA__server__SSH_PORT = "2222";
+      GITEA__server__SSH_LISTEN_PORT = "22";
 
       # Security
       GITEA__security__INSTALL_LOCK = "true";
