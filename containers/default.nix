@@ -14,6 +14,7 @@
     ./foundryvtt/foundry_chef.nix
     ./observability.nix
     ./gitea.nix
+    ./act_runner.nix
   ];
 
   # Global Podman Configuration
