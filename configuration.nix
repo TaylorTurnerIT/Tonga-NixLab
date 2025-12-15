@@ -75,27 +75,27 @@
 	sops.secrets.jexactyl_db_root_password = { };
 	sops.secrets.jexactyl_app_key = { };
 
-	# Template to generate the .env file for the container
+	# Generate the .env file that the container will mount
 	sops.templates."jexactyl.env" = {
 		content = ''
-		APP_ENV=production
-		APP_DEBUG=false
-		APP_KEY=${config.sops.placeholder.jexactyl_app_key}
-		APP_URL=https://panel.tongatime.us
-		
-		DB_HOST=jexactyl-mariadb
-		DB_PORT=3306
-		DB_DATABASE=panel
-		DB_USERNAME=jexactyl
-		DB_PASSWORD=${config.sops.placeholder.jexactyl_db_password}
-		
-		REDIS_HOST=jexactyl-redis
-		REDIS_PASSWORD=null
-		REDIS_PORT=6379
-		
-		CACHE_DRIVER=redis
-		SESSION_DRIVER=redis
-		QUEUE_CONNECTION=redis
+			APP_ENV=production
+			APP_DEBUG=false
+			APP_KEY=${config.sops.placeholder.jexactyl_app_key}
+			APP_URL=https://panel.tongatime.us
+			
+			DB_HOST=jexactyl-mariadb
+			DB_PORT=3306
+			DB_DATABASE=panel
+			DB_USERNAME=jexactyl
+			DB_PASSWORD=${config.sops.placeholder.jexactyl_db_password}
+			
+			REDIS_HOST=jexactyl-redis
+			REDIS_PASSWORD=null
+			REDIS_PORT=6379
+			
+			CACHE_DRIVER=redis
+			SESSION_DRIVER=redis
+			QUEUE_CONNECTION=redis
 		'';
 	};
 
