@@ -26,12 +26,22 @@
     # --- HOME SERVER ---
     nixosConfigurations.homelab = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
-      # specialArgs = { inherit (inputs) self; }; # Ensure inputs are passed to modules
+      specialArgs = { inherit inputs; };
       modules = [
         disko.nixosModules.disko
         ./disko-config.nix
         ./configuration.nix
         sops-nix.nixosModules.sops
+        
+        # Home Manager integration
+        inputs.disko.nixosModules.disko
+        inputs.sops-nix.nixosModules.sops
+        inputs.home-manager.nixosModules.home-manager
+        {
+          home-manager.useGlobalPkgs = true;
+          home-manager.useUserPackages = true;
+          home-manager.users.taylor = import ./homelab/home.nix;
+        }
       ];
     };
 
