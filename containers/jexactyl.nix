@@ -58,11 +58,27 @@ in
       # Check if we need to rebuild
       if [ ! -f "$STATE_FILE" ] || [ "$(cat $STATE_FILE)" != "$CURRENT_HASH" ]; then
         echo "Source changed. Building Jexactyl container from ${src}..."
-        
+
+        # Create temporary build context with patched Containerfile
+        BUILD_DIR=$(mktemp -d)
+        trap "rm -rf $BUILD_DIR" EXIT
+
+        # Copy source to build directory
+        cp -r ${src}/. $BUILD_DIR/
+
+        # Create missing files that Containerfile expects but aren't in the repo
+        touch $BUILD_DIR/.npmrc
+        touch $BUILD_DIR/CHANGELOG.md
+        touch $BUILD_DIR/SECURITY.md
+
+        # Ensure essential files exist (create empty if missing)
+        [ -f $BUILD_DIR/LICENSE.md ] || echo "MIT License" > $BUILD_DIR/LICENSE.md
+        [ -f $BUILD_DIR/README.md ] || echo "# Jexactyl" > $BUILD_DIR/README.md
+
         ${pkgs.podman}/bin/podman build \
           -t jexactyl-panel:local \
-          -f ${src}/Containerfile \
-          ${src}
+          -f $BUILD_DIR/Containerfile \
+          $BUILD_DIR
 
         echo "$CURRENT_HASH" > "$STATE_FILE"
         echo "Build complete."
