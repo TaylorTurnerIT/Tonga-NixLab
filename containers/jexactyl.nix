@@ -28,6 +28,7 @@ in {
 		REDIS_HOST=jexactyl-redis
 		REDIS_PORT=6379
 		REDIS_PASSWORD=${config.sops.placeholder.jexactyl_redis_password}
+		RECAPTCHA_ENABLED=false
 	'';
 
 	# --- The Web Stack (Panel + DB + Redis) ---
