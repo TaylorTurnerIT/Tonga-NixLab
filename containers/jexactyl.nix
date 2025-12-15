@@ -137,17 +137,13 @@ in {
 	  script = ''
 		set -e
 		
-		# --- THE CLEAN WAIT ---
-		# Instead of a loop, we block here. Podman handles the polling efficiently.
 		# This command will hang until the status becomes 'healthy'.
 		echo "Waiting for Database to become healthy..."
 		${pkgs.podman}/bin/podman wait --condition=healthy jexactyl-db
 
-		# 2. Run Migrations
 		echo "Running Migrations..."
 		${pkgs.podman}/bin/podman exec jexactyl-panel php artisan migrate --seed --force
 
-		# 3. Create Admin User
 		echo "Creating Admin User..."
 		ADMIN_PASS=$(cat ${config.sops.secrets.jexactyl_admin_password.path})
 		
