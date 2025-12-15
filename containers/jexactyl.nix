@@ -168,7 +168,7 @@ in
       volumes = [
         "${dataDir}/panel/storage:/var/www/pterodactyl/var/"
         "${dataDir}/panel/logs:/var/www/pterodactyl/storage/logs"
-        "${dataDir}/panel/nginx:/etc/nginx/http.d/"
+        # "${dataDir}/panel/nginx:/etc/nginx/http.d/"
         
         "${config.sops.templates."jexactyl.env".path}:/var/www/pterodactyl/.env"
       ];
