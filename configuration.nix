@@ -107,8 +107,27 @@
 
 	users.users.root.openssh.authorizedKeys.keys =  [
 		# Public Keys for root user
-		"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJB9MG22hSHdYpwIWFRanUF88YvOYNcrV1zxAvv2RDJt taylort3450@syn-2600-6c5d-567f-3f2b-c338-35e0-ec14-df45.biz6.spectrum.com" 
+		"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJB9MG22hSHdYpwIWFRanUF88YvOYNcrV1zxAvv2RDJt taylort3450@syn-2600-6c5d-567f-3f2b-c338-35e0-ec14-df45.biz6.spectrum.com"
 	];
+
+	# Dedicated user for running rootless containers
+	users.users.podman-services = {
+		isSystemUser = true;
+		group = "podman-services";
+		home = "/var/lib/podman-services";
+		createHome = true;
+		description = "Rootless Podman service containers";
+
+		# Enable lingering so systemd user services persist after logout
+		linger = true;
+
+		# Configure subordinate UID/GID ranges for user namespaces
+		# Host UID 100000 maps to container UID 0 (root inside container)
+		subUidRanges = [{ startUid = 100000; count = 65536; }];
+		subGidRanges = [{ startGid = 100000; count = 65536; }];
+	};
+
+	users.groups.podman-services = {};
 
 	# --- PODMAN ---
 	virtualisation.podman = {
@@ -116,6 +135,9 @@
 		dockerCompat = true;
 		defaultNetwork.settings.dns_enabled = true;
 	};
+
+	# Allow rootless containers to bind to privileged ports (<1024)
+	boot.kernel.sysctl."net.ipv4.ip_unprivileged_port_start" = 0;
 
 	# --- PACKAGES ---
 	environment.systemPackages = with pkgs; [ 

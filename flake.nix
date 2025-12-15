@@ -32,16 +32,6 @@
         ./disko-config.nix
         ./configuration.nix
         sops-nix.nixosModules.sops
-        
-        # Home Manager integration
-        inputs.disko.nixosModules.disko
-        inputs.sops-nix.nixosModules.sops
-        inputs.home-manager.nixosModules.home-manager
-        {
-          home-manager.useGlobalPkgs = true;
-          home-manager.useUserPackages = true;
-          home-manager.users.taylor = import ./homelab/home.nix;
-        }
       ];
     };
 
