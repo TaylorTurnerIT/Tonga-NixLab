@@ -42,51 +42,60 @@ in
   # If the Flake input changed (new commit), it triggers a rebuild.
   
   systemd.services.build-jexactyl-image = {
-	description = "Build Jexactyl Panel Image from Flake Source";
-	after = [ "podman.service" ];
-	requires = [ "podman.service" ];
-	wantedBy = [ "multi-user.target" ];
-	serviceConfig = {
-	  Type = "oneshot";
-	  TimeoutStartSec = 900; # Allow 15 mins for build
-	};
-	script = ''
-	  # Define state file to track build version
-	  STATE_FILE="${dataDir}/.built_hash"
-	  CURRENT_HASH="${src}"
+    description = "Build Jexactyl Panel Image from Flake Source";
+    after = [ "podman.service" ];
+    requires = [ "podman.service" ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      TimeoutStartSec = 900;
+    };
+    script = ''
+      # Define state file to track build version
+      STATE_FILE="${dataDir}/.built_hash"
+      CURRENT_HASH="${src}"
 
-	  # Check if we need to rebuild
-	  if [ ! -f "$STATE_FILE" ] || [ "$(cat $STATE_FILE)" != "$CURRENT_HASH" ]; then
-		echo "Source changed. Building Jexactyl container from ${src}..."
+      # Check if we need to rebuild
+      if [ ! -f "$STATE_FILE" ] || [ "$(cat $STATE_FILE)" != "$CURRENT_HASH" ]; then
+        echo "Source changed. Building Jexactyl container from ${src}..."
 
-		# Create temporary build context with patched Containerfile
-		BUILD_DIR=$(mktemp -d)
-		trap "rm -rf $BUILD_DIR" EXIT
+        # Create temporary build context
+        BUILD_DIR=$(mktemp -d)
+        trap "rm -rf $BUILD_DIR" EXIT
 
-		# Copy source to build directory
-		cp -r ${src}/. $BUILD_DIR/
+        # Copy source to build directory
+        cp -r ${src}/. $BUILD_DIR/
 
-		# Create missing files that Containerfile expects but aren't in the repo
-		touch $BUILD_DIR/.npmrc
-		touch $BUILD_DIR/CHANGELOG.md
-		touch $BUILD_DIR/SECURITY.md
+        # Create missing files
+        touch $BUILD_DIR/.npmrc
+        touch $BUILD_DIR/CHANGELOG.md
+        touch $BUILD_DIR/SECURITY.md
+        [ -f $BUILD_DIR/LICENSE.md ] || echo "MIT License" > $BUILD_DIR/LICENSE.md
+        [ -f $BUILD_DIR/README.md ] || echo "# Jexactyl" > $BUILD_DIR/README.md
 
-		# Ensure essential files exist (create empty if missing)
-		[ -f $BUILD_DIR/LICENSE.md ] || echo "MIT License" > $BUILD_DIR/LICENSE.md
-		[ -f $BUILD_DIR/README.md ] || echo "# Jexactyl" > $BUILD_DIR/README.md
+        # --- PATCH: Fix Yacron/Libz Conflict ---
+        # We append instructions to the end of the Containerfile to:
+        # 1. Install Python3 and Pip
+        # 2. Remove the pre-compiled yacron binary (which causes the LD_LIBRARY_PATH crash)
+        # 3. Install yacron via pip (which uses system libraries safely)
+        echo "" >> $BUILD_DIR/Containerfile
+        echo "RUN apk add --no-cache python3 py3-pip && \\" >> $BUILD_DIR/Containerfile
+        echo "    rm -f /usr/local/bin/yacron && \\" >> $BUILD_DIR/Containerfile
+        echo "    pip3 install yacron --break-system-packages" >> $BUILD_DIR/Containerfile
+        # ---------------------------------------
 
-		${pkgs.podman}/bin/podman build \
-		  -t jexactyl-panel:local \
-		  -f $BUILD_DIR/Containerfile \
-		  $BUILD_DIR
+        ${pkgs.podman}/bin/podman build \
+          -t jexactyl-panel:local \
+          -f $BUILD_DIR/Containerfile \
+          $BUILD_DIR
 
-		echo "$CURRENT_HASH" > "$STATE_FILE"
-		echo "Build complete."
-	  else
-		echo "Source unchanged. Using existing image."
-	  fi
-	'';
-	};
+        echo "$CURRENT_HASH" > "$STATE_FILE"
+        echo "Build complete."
+      else
+        echo "Source unchanged. Using existing image."
+      fi
+    '';
+};
 
 	# ---------------------------------------------------------
 	# CONTAINER DEFINITIONS
