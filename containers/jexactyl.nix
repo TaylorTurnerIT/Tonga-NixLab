@@ -80,8 +80,12 @@ in
         # This bypasses the need to guess the exact UID/Username.
         echo "RUN chmod -R 777 /var/www/pterodactyl/bootstrap/cache /var/www/pterodactyl/storage" >> $BUILD_DIR/Containerfile
 
-        # 5. Configure Caddy to listen on port 8081 and disable admin API (for host networking)
-        echo "RUN sed -i 's/:8080/:8081/g' /etc/caddy/Caddyfile" >> $BUILD_DIR/Containerfile
+        # 5. Configure Caddy: Move to 8081, Wrap in Braces, and Fix Admin Port
+        # We must wrap the site in braces because we are adding a global options block.
+        echo "RUN sed -i 's/:8080/:8081 {/g' /etc/caddy/Caddyfile" >> $BUILD_DIR/Containerfile
+        echo "RUN echo '}' >> /etc/caddy/Caddyfile" >> $BUILD_DIR/Containerfile
+        
+        # Add the global admin block at the top
         echo "RUN sed -i '1i {\\\\n  admin 127.0.0.1:2024\\\\n}' /etc/caddy/Caddyfile" >> $BUILD_DIR/Containerfile
 
         # 6. Do NOT switch user back manually.
