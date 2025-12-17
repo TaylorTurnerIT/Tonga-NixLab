@@ -191,10 +191,10 @@ in
 		
 		ports = [ "127.0.0.1:8081:80" ];
 		
-		# ADD THIS LINE:
+
 		extraOptions = [ 
 			"--network=${podmanNetwork}"
-			"--dns-search=${podmanNetwork}"  # ← ADD THIS
+			"--dns-search=${podmanNetwork}"
 		];
 	};
 
