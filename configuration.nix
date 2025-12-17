@@ -83,16 +83,16 @@
 			APP_DEBUG=false
 			APP_KEY=${config.sops.placeholder.jexactyl_app_key}
 			APP_URL=https://panel.tongatime.us
-			
-			DB_HOST=jexactyl-mariadb
+
+			DB_HOST=127.0.0.1
 			DB_PORT=3306
 			DB_DATABASE=panel
 			DB_USERNAME=jexactyl
 			DB_PASSWORD=${config.sops.placeholder.jexactyl_db_password}
-			
-			REDIS_HOST=jexactyl-redis
+
+			REDIS_HOST=127.0.0.1
 			REDIS_PORT=6379
-			
+
 			CACHE_DRIVER=redis
 			SESSION_DRIVER=redis
 			QUEUE_CONNECTION=redis

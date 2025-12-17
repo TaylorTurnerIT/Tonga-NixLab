@@ -22,18 +22,6 @@ in
 		"d ${dataDir}/wings/data 0700 0 0 -"
 	];
 
-	# Ensure the internal network exists before any container starts
-	systemd.services.init-jexactyl-network = {
-		description = "Create Jexactyl Internal Podman Network";
-		after = [ "network.target" "podman.service" ];
-		requires = [ "podman.service" ];
-		wantedBy = [ "multi-user.target" ];
-		serviceConfig.Type = "oneshot";
-		script = ''
-		${pkgs.podman}/bin/podman network exists ${podmanNetwork} || \
-		${pkgs.podman}/bin/podman network create ${podmanNetwork}
-		'';
-	};
 
 	# ---------------------------------------------------------
 	# BUILDER SERVICE: Jexactyl Panel Image
@@ -93,8 +81,12 @@ in
         # We use chmod 777 so ANY user (nginx, nobody, www-data) can write here.
         # This bypasses the need to guess the exact UID/Username.
         echo "RUN chmod -R 777 /var/www/pterodactyl/bootstrap/cache /var/www/pterodactyl/storage" >> $BUILD_DIR/Containerfile
-        
-        # 5. Do NOT switch user back manually. 
+
+        # 5. Configure nginx to listen on port 8081 instead of 80 (for host networking)
+        echo "RUN find /etc/nginx -type f -exec sed -i 's/listen 80/listen 8081/g' {} +" >> $BUILD_DIR/Containerfile
+        echo "RUN find /etc/nginx -type f -exec sed -i 's/listen \[::\]:80/listen [::]:8081/g' {} +" >> $BUILD_DIR/Containerfile
+
+        # 6. Do NOT switch user back manually.
         # We let the Base Image's original ENTRYPOINT handle the user switching.
         # ---------------------------------------
 
@@ -136,7 +128,7 @@ in
 			SYSTEM = "0"; # Block system pruning
 		};
 		volumes = [ "/run/podman/podman.sock:/var/run/docker.sock:ro" ];
-		extraOptions = [ "--network=${podmanNetwork}" ];
+		extraOptions = [ "--network=host" ];
 	};
 
 	# --- DATABASE ---
@@ -153,50 +145,43 @@ in
 			"${config.sops.secrets.jexactyl_db_password.path}:/run/secrets/jexactyl_db_password:ro"
 			"${config.sops.secrets.jexactyl_db_root_password.path}:/run/secrets/jexactyl_db_root_password:ro"
 		];
-		extraOptions = [ "--network=${podmanNetwork}" ];
+		extraOptions = [ "--network=host" ];
 	};
 
 	# --- CACHE ---
 	jexactyl-redis = {
 		image = "redis:alpine";
 		volumes = [ "${dataDir}/redis:/data" ];
-		extraOptions = [ "--network=${podmanNetwork}" ];
+		extraOptions = [ "--network=host" ];
 	};
 
 	# --- APP: PANEL ---
 	jexactyl-panel = {
-		image = "jexactyl-panel:local"; 
-		
+		image = "jexactyl-panel:local";
+
 		dependsOn = [ "jexactyl-mariadb" "jexactyl-redis" ];
-		
+
 		environment = {
 			APP_URL = "https://panel.tongatime.us";
 			APP_ENV = "production";
 			APP_ENVIRONMENT_ONLY = "false";
-			DB_HOST = "jexactyl-mariadb";
+			DB_HOST = "127.0.0.1";
 			DB_PORT = "3306";
 			DB_DATABASE = "panel";
 			DB_USERNAME = "jexactyl";
 			CACHE_DRIVER = "redis";
 			SESSION_DRIVER = "redis";
 			QUEUE_DRIVER = "redis";
-			REDIS_HOST = "jexactyl-redis";
+			REDIS_HOST = "127.0.0.1";
 		};
-		
+
 		volumes = [
 			"${dataDir}/panel/storage:/var/www/pterodactyl/var/"
 			"${dataDir}/panel/logs:/var/www/pterodactyl/storage/logs"
 			"${config.sops.templates."jexactyl.env".path}:/var/www/pterodactyl/.env"
 		];
-		
-		ports = [ "127.0.0.1:8081:80" ];
-		
 
-		extraOptions = [ 
-			"--network=${podmanNetwork}"
-			"--add-host=jexactyl-mariadb:10.89.2.2"
-			"--add-host=jexactyl-redis:10.89.2.3"
-		];
+		extraOptions = [ "--network=host" ];
 	};
 
 
@@ -209,7 +194,7 @@ in
 			WINGS_UID = "0";
 			WINGS_GID = "0";
 			# WINGS TALKS TO PROXY
-			DOCKER_HOST = "tcp://jexactyl-socket-proxy:2375";
+			DOCKER_HOST = "tcp://127.0.0.1:2375";
 		};
 		volumes = [
 			"${dataDir}/wings/config:/etc/pterodactyl"
@@ -217,12 +202,11 @@ in
 			# Wings might need direct access to libpod/storage depending on driver
 			# But standardized setups use socket/TCP.
 		];
-		ports = [ "127.0.0.1:8082:443" ]; 
-		extraOptions = [ 
-			"--network=${podmanNetwork}" 
-			"--privileged" 
-		]; 
-		};
+		extraOptions = [
+			"--network=host"
+			"--privileged"
+		];
+	};
 	};
 	
 	# FORCE DEPENDENCY: Panel service must wait for the Build service
@@ -242,12 +226,4 @@ in
 		};
 	};
 
-	# ---------------------------------------------------------
-	# DEPENDENCY ORDERING
-	# ---------------------------------------------------------  
-	systemd.services.podman-jexactyl-redis.requires = [ "init-jexactyl-network.service" ];
-	systemd.services.podman-jexactyl-redis.after = [ "init-jexactyl-network.service" ];
-	
-	systemd.services.podman-jexactyl-mariadb.requires = [ "init-jexactyl-network.service" ];
-	systemd.services.podman-jexactyl-mariadb.after = [ "init-jexactyl-network.service" ];
 }
