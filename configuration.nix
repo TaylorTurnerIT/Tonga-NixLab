@@ -91,7 +91,6 @@
 			DB_PASSWORD=${config.sops.placeholder.jexactyl_db_password}
 			
 			REDIS_HOST=jexactyl-redis
-			REDIS_PASSWORD=null
 			REDIS_PORT=6379
 			
 			CACHE_DRIVER=redis
