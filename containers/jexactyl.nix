@@ -84,7 +84,7 @@ in
 
         # 5. Configure Caddy to listen on port 8081 and disable admin API (for host networking)
         echo "RUN sed -i 's/:8080/:8081/g' /etc/caddy/Caddyfile" >> $BUILD_DIR/Containerfile
-        echo "RUN sed -i '1i {\\\\n  admin off\\\\n}' /etc/caddy/Caddyfile" >> $BUILD_DIR/Containerfile
+        echo "RUN sed -i '1i {\\\\n  admin 127.0.0.1:2024\\\\n}' /etc/caddy/Caddyfile" >> $BUILD_DIR/Containerfile
 
         # 6. Do NOT switch user back manually.
         # We let the Base Image's original ENTRYPOINT handle the user switching.
