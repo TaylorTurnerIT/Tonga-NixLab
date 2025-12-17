@@ -165,7 +165,6 @@ in
 
 	# --- APP: PANEL ---
 	jexactyl-panel = {
-		# USE THE LOCALLY BUILT IMAGE
 		image = "jexactyl-panel:local"; 
 		
 		dependsOn = [ "jexactyl-mariadb" "jexactyl-redis" ];
@@ -178,10 +177,6 @@ in
 			DB_PORT = "3306";
 			DB_DATABASE = "panel";
 			DB_USERNAME = "jexactyl";
-			# Jexactyl Entrypoint usually expects DB_PASSWORD env var. 
-			# Since we use secrets files, we might need a custom entrypoint wrapper 
-			# or rely on the application reading the file if supported.
-			# Fallback: Populate via sops template directly into ENV (less secure but compatible).
 			CACHE_DRIVER = "redis";
 			SESSION_DRIVER = "redis";
 			QUEUE_DRIVER = "redis";
@@ -191,14 +186,18 @@ in
 		volumes = [
 			"${dataDir}/panel/storage:/var/www/pterodactyl/var/"
 			"${dataDir}/panel/logs:/var/www/pterodactyl/storage/logs"
-			# "${dataDir}/panel/nginx:/etc/nginx/http.d/"
-			
 			"${config.sops.templates."jexactyl.env".path}:/var/www/pterodactyl/.env"
-			];
-			
-			ports = [ "127.0.0.1:8081:80" ]; # Localhost only, for Caddy
-			extraOptions = [ "--network=${podmanNetwork}" ];
+		];
+		
+		ports = [ "127.0.0.1:8081:80" ];
+		
+		# ADD THIS LINE:
+		extraOptions = [ 
+			"--network=${podmanNetwork}"
+			"--dns-search=${podmanNetwork}"  # ← ADD THIS
+		];
 	};
+
 
 	# --- DAEMON: WINGS ---
 	jexactyl-wings = {
