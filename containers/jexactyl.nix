@@ -194,7 +194,6 @@ in
 
 		extraOptions = [ 
 			"--network=${podmanNetwork}"
-			"--dns-search=${podmanNetwork}"
 		];
 	};
 
