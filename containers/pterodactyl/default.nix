@@ -108,11 +108,11 @@ let
 in {
   # --- Secrets Management ---
   sops.secrets = {
-	"pterodactyl/app_key" = { owner = "root"; };
-	"pterodactyl/db_password" = { owner = "root"; };
-	"pterodactyl/admin_password" = { owner = "root"; };
-	"pterodactyl/wings_uuid" = { owner = "root"; };
-	"pterodactyl/wings_token" = { owner = "root"; };
+	"pterodactyl_app_key" = { owner = "root"; };
+	"pterodactyl_db_password" = { owner = "root"; };
+	"pterodactyl_admin_password" = { owner = "root"; };
+	"pterodactyl_wings_uuid" = { owner = "root"; };
+	"pterodactyl_wings_token" = { owner = "root"; };
   };
 
   # --- Configuration Templates ---
@@ -120,7 +120,7 @@ in {
 	content = ''
 	  APP_ENV=production
 	  APP_DEBUG=true  # Temporarily true to see 500 errors in browser if they persist
-	  APP_KEY=${config.sops.placeholder."pterodactyl/app_key"}
+	  APP_KEY=${config.sops.placeholder."pterodactyl_app_key"}
 	  APP_URL=https://panel.tongatime.us
 	  APP_TIMEZONE=UTC
 	  APP_SERVICE_AUTHOR=admin@tongatime.us
@@ -130,7 +130,7 @@ in {
 	  DB_PORT=3306
 	  DB_DATABASE=panel
 	  DB_USERNAME=pterodactyl
-	  DB_PASSWORD=${config.sops.placeholder."pterodactyl/db_password"}
+	  DB_PASSWORD=${config.sops.placeholder."pterodactyl_db_password"}
 	  
 	  REDIS_HOST=pterodactyl-redis
 	  REDIS_PASSWORD=
@@ -146,9 +146,9 @@ in {
   sops.templates."pterodactyl-wings.yml" = {
 	content = builtins.toJSON {
 	  debug = false;
-	  uuid = "${config.sops.placeholder."pterodactyl/wings_uuid"}";
+	  uuid = "${config.sops.placeholder."pterodactyl_wings_uuid"}";
 	  token_id = "SET_IN_PANEL_IF_NEEDED";
-	  token = "${config.sops.placeholder."pterodactyl/wings_token"}";
+	  token = "${config.sops.placeholder."pterodactyl_wings_token"}";
 	  
 	  api = {
 		host = "0.0.0.0";
@@ -196,7 +196,7 @@ in {
 	  };
 	  volumes = [
 		"${dataDir}/mysql:/var/lib/mysql"
-		"${config.sops.secrets."pterodactyl/db_password".path}:/run/secrets/pterodactyl_db_password:ro"
+		"${config.sops.secrets."pterodactyl_db_password".path}:/run/secrets/pterodactyl_db_password:ro"
 	  ];
 	};
 
@@ -216,7 +216,7 @@ in {
 		"${dataDir}/var:/app/var"
 		"${dataDir}/logs:/app/storage/logs"
 		"${config.sops.templates."pterodactyl-panel.env".path}:/tmp/.env.sops:ro"
-		"${config.sops.secrets."pterodactyl/admin_password".path}:/run/secrets/admin_password:ro"
+		"${config.sops.secrets."pterodactyl_admin_password".path}:/run/secrets/admin_password:ro"
 		"${panelEntrypoint}:/entrypoint.sh:ro"
 	  ];
 	  entrypoint = "/bin/sh";
