@@ -64,7 +64,7 @@ let
     php artisan config:clear
     php artisan view:clear
 
-    echo "--> Setting Permissions (Final Fix)..."
+    echo "--> Setting Permissions..."
     # Ensure www-data owns EVERYTHING, including the logs/cache created by the root commands above.
     chown -R www-data:www-data /app/var /app/storage /app/bootstrap/cache /app/public
 
