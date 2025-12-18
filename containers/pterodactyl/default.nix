@@ -252,8 +252,7 @@ in {
         "/var/lib/pterodactyl-wings/data:/var/lib/pterodactyl"
         "/var/lib/pterodactyl-wings/logs:/var/log/pterodactyl"
         "/tmp/pterodactyl-wings:/tmp/pterodactyl"
-        "${config.sops.templates."pterodactyl-wings.yml".path}:/tmp/config.yml.ro:ro"
-        "${wingsEntrypoint}:/entrypoint.sh:ro"
+        "/var/lib/pterodactyl-wings/config:/etc/pterodactyl" 
       ];
       
       environment = {
@@ -262,9 +261,6 @@ in {
         WINGS_GID = "0";
         WINGS_USERNAME = "root";
       };
-
-      entrypoint = "/bin/sh";
-      cmd = [ "/entrypoint.sh" ];
     };
   };
   
@@ -277,5 +273,18 @@ in {
 	"d /var/lib/pterodactyl-wings/data 0700 0 0 - -"
 	"d /var/lib/pterodactyl-wings/logs 0700 0 0 - -"
 	"d /tmp/pterodactyl-wings 0700 0 0 - -"
+	"d /var/lib/pterodactyl-wings/config 0700 0 0 - -"
   ];
+
+  # --- Service Configuration ---
+  # Prepare the config file on the host before the container starts
+  systemd.services.podman-pterodactyl-wings = {
+    preStart = lib.mkAfter ''
+      echo "--> Copying Wings Config..."
+      # Copy the sops-rendered template to the persistent config directory
+      cp -f ${config.sops.templates."pterodactyl-wings.yml".path} /var/lib/pterodactyl-wings/config/config.yml
+      # Ensure it is writable by the container (if needed) and readable
+      chmod 644 /var/lib/pterodactyl-wings/config/config.yml
+    '';
+  };
 }
