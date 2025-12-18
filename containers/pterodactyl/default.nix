@@ -25,7 +25,6 @@ let
     else
         PHP_FPM=$(find /usr/sbin -name "php-fpm*" -type f | head -n 1)
     fi
-
     echo "--> Detected PHP-FPM at: $PHP_FPM"
 
     # 2. Environment & Secrets
@@ -59,12 +58,14 @@ let
     fi
 
     echo "--> Clearing Application Cache..."
+    # These commands run as ROOT and create root-owned files.
+    # We must run them BEFORE the final chown.
     php artisan optimize:clear
     php artisan config:clear
     php artisan view:clear
 
     echo "--> Setting Permissions (Final Fix)..."
-    # Ensure www-data owns EVERYTHING, including files created by the root commands above
+    # Ensure www-data owns EVERYTHING, including the logs/cache created by the root commands above.
     chown -R www-data:www-data /app/var /app/storage /app/bootstrap/cache /app/public
 
     echo "--> Starting PHP-FPM (as www-data)..."
@@ -81,6 +82,7 @@ let
     #!/bin/sh
     set -e
     cp /tmp/.env.sops /app/.env
+    # Wait for panel to finish booting
     sleep 5
     exec php artisan queue:work --sleep=3 --tries=3
   '';
