@@ -106,6 +106,21 @@ let
 	exec php artisan queue:work --sleep=3 --tries=3
   '';
 
+  wingsEntrypoint = pkgs.writeText "wings-entrypoint.sh" ''
+    #!/bin/sh
+    set -e
+    
+    echo "--> Initializing Wings Config..."
+    # Copy the read-only template to the writable location
+    cp /tmp/config.yml.ro /etc/pterodactyl/config.yml
+    
+    # Ensure it is writable
+    chmod 644 /etc/pterodactyl/config.yml
+    
+    echo "--> Starting Wings..."
+    exec /usr/bin/wings --config /etc/pterodactyl/config.yml
+  '';
+
 in {
   # --- Secrets Management ---
   sops.secrets = {
@@ -153,11 +168,11 @@ in {
 	  token = "${config.sops.placeholder."pterodactyl_wings_token"}";
 	  
 	  api = {
-		host = "0.0.0.0";
-		port = 8080;
-		ssl = { enabled = false; };
-		upload_limit = 100;
-	  };
+        host = "0.0.0.0";
+        port = 8082;
+        ssl = { enabled = false; };
+        upload_limit = 100;
+      };
 	  
 	  system = {
 		data = "/var/lib/pterodactyl/volumes";
@@ -242,25 +257,30 @@ in {
 	};
 
 	# --- Wings ---
-	pterodactyl-wings = {
-	  image = images.wings;
-	  autoStart = true;
-	  ports = [ "8082:8080" "2022:2022" ];
-	  volumes = [
-		"/var/run/podman/podman.sock:/var/run/docker.sock"
-		"/var/lib/pterodactyl-wings/data:/var/lib/pterodactyl"
-		"/var/lib/pterodactyl-wings/logs:/var/log/pterodactyl"
-		"/tmp/pterodactyl-wings:/tmp/pterodactyl"
-		"${config.sops.templates."pterodactyl-wings.yml".path}:/etc/pterodactyl/config.yml:ro"
-	  ];
-	  environment = {
-		TZ = "UTC";
-		WINGS_UID = "0";
-		WINGS_GID = "0";
-		WINGS_USERNAME = "root";
-	  };
-	  extraOptions = [ "--privileged" ];
-	};
+    pterodactyl-wings = {
+      image = images.wings;
+      autoStart = true;
+      extraOptions = [ "--privileged" "--network=host" ];
+      
+      volumes = [
+        "/var/run/podman/podman.sock:/var/run/docker.sock"
+        "/var/lib/pterodactyl-wings/data:/var/lib/pterodactyl"
+        "/var/lib/pterodactyl-wings/logs:/var/log/pterodactyl"
+        "/tmp/pterodactyl-wings:/tmp/pterodactyl"
+        "${config.sops.templates."pterodactyl-wings.yml".path}:/tmp/config.yml.ro:ro"
+        "${wingsEntrypoint}:/entrypoint.sh:ro"
+      ];
+      
+      environment = {
+        TZ = "UTC";
+        WINGS_UID = "0";
+        WINGS_GID = "0";
+        WINGS_USERNAME = "root";
+      };
+
+      entrypoint = "/bin/sh";
+      cmd = [ "/entrypoint.sh" ];
+    };
   };
   
   # --- Permissions ---
