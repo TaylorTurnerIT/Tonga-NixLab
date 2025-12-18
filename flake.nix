@@ -15,10 +15,6 @@
     # Add sops-nix for managing secrets
     sops-nix.url = "github:Mic92/sops-nix";
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
-
-    jexactyl-src = {
-      url = "github:jexactyl/jexactyl"; 
-      flake = false; # It's not a nix flake itself
   };
   };
 
