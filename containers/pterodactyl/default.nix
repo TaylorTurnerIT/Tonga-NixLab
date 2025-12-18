@@ -2,6 +2,7 @@
 
 let
   podmanNetwork = "pterodactyl_net";
+  podmanSubnet = "10.50.0.0/24";
   dataDir = "/var/lib/pterodactyl";
   
   images = {
@@ -132,8 +133,17 @@ in {
   };
 
   # --- Networking ---
+  # Allow traffic from the Pterodactyl subnet (fixes DNS and DB connection issues)
+  networking.firewall.extraCommands = ''
+    iptables -A INPUT -s ${podmanSubnet} -j ACCEPT
+  '';
+
   systemd.services."create-${podmanNetwork}-network" = {
-    script = "${pkgs.podman}/bin/podman network create ${podmanNetwork} || true";
+    # Check if network exists; if not, create it with the specific subnet
+    script = ''
+      ${pkgs.podman}/bin/podman network exists ${podmanNetwork} || \
+      ${pkgs.podman}/bin/podman network create --subnet ${podmanSubnet} ${podmanNetwork}
+    '';
     wantedBy = [ "multi-user.target" ];
   };
 
