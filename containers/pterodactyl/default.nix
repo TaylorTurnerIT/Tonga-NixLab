@@ -286,12 +286,12 @@ in {
       extraOptions = [ "--privileged" "--network=host" ];
       
       volumes = [
-        "/var/run/docker.sock:/var/run/docker.sock"
-        "/var/lib/pterodactyl-wings/data:/var/lib/pterodactyl"
-        "/var/lib/pterodactyl-wings/logs:/var/log/pterodactyl"
-        "/tmp/pterodactyl-wings:/tmp/pterodactyl"
-        "/var/lib/pterodactyl-wings/config:/etc/pterodactyl" 
-      ];
+      "/var/run/docker.sock:/var/run/docker.sock"
+      "/var/lib/pterodactyl:/var/lib/pterodactyl" 
+      "/var/log/pterodactyl-wings:/var/log/pterodactyl"
+      "/etc/pterodactyl-wings:/etc/pterodactyl" 
+      "/tmp/pterodactyl-wings:/tmp/pterodactyl"
+    ];
       
       environment = {
         TZ = "UTC";
@@ -306,14 +306,14 @@ in {
   
   # --- Permissions ---
   systemd.tmpfiles.rules = [
-	"d ${dataDir}/mysql 0700 999 999 - -"
-	"d ${dataDir}/redis 0700 999 999 - -"
-	"d ${dataDir}/var 0755 33 33 - -"
-	"d ${dataDir}/logs 0755 33 33 - -"
-	"d /var/lib/pterodactyl-wings/data 0700 0 0 - -"
-	"d /var/lib/pterodactyl-wings/logs 0700 0 0 - -"
-	"d /tmp/pterodactyl-wings 0700 0 0 - -"
-	"d /var/lib/pterodactyl-wings/config 0700 0 0 - -"
+    "d ${dataDir}/mysql 0700 999 999 - -"
+    "d ${dataDir}/redis 0700 999 999 - -"
+    "d ${dataDir}/var 0755 33 33 - -"
+    "d ${dataDir}/logs 0755 33 33 - -"
+    "d /var/lib/pterodactyl/volumes 0700 0 0 - -"
+    "d /var/log/pterodactyl-wings 0700 0 0 - -"
+    "d /tmp/pterodactyl-wings 0700 0 0 - -"
+    "d /etc/pterodactyl-wings 0700 0 0 - -"
   ];
 
   # --- Service Configuration ---
@@ -321,11 +321,8 @@ in {
   systemd.services.podman-pterodactyl-wings = {
     preStart = lib.mkAfter ''
       echo "--> Copying Wings Config..."
-      # Copy the sops-rendered template to the persistent config directory
-      cp -f ${config.sops.templates."pterodactyl-wings.yml".path} /var/lib/pterodactyl-wings/config/config.yml
-      # Ensure it is writable by the container (if needed) and readable
-      chmod 644 /var/lib/pterodactyl-wings/config/config.yml
-	  chmod 666 /var/run/podman/podman.sock || true
+      cp -f ${config.sops.templates."pterodactyl-wings.yml".path} /etc/pterodactyl-wings/config.yml
+      chmod 644 /etc/pterodactyl-wings/config.yml
     '';
   };
 }
