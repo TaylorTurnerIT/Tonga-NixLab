@@ -17,11 +17,25 @@ let
     #!/bin/sh
     set -e
     
-    # 1. Dynamic PHP-FPM Binary Detection
-    # Finds php-fpm82, php-fpm81, or just php-fpm
-    PHP_FPM=$(ls /usr/sbin/php-fpm* | sort -r | head -n 1)
-    echo "--> Detected PHP-FPM binary: $PHP_FPM"
+    # --- 1. Auto-Detect PHP-FPM Binary ---
+    # We search common paths for the binary
+    if [ -x /usr/local/sbin/php-fpm ]; then
+        PHP_FPM="/usr/local/sbin/php-fpm"
+    elif [ -x /usr/sbin/php-fpm ]; then
+        PHP_FPM="/usr/sbin/php-fpm"
+    else
+        # Find the first executable matching php-fpm* in /usr/sbin
+        PHP_FPM=$(find /usr/sbin -name "php-fpm*" -type f | head -n 1)
+    fi
 
+    if [ -z "$PHP_FPM" ]; then
+        echo "FATAL: Could not find php-fpm binary. Listing /usr/sbin:"
+        ls -la /usr/sbin/
+        exit 1
+    fi
+    echo "--> Detected PHP-FPM at: $PHP_FPM"
+
+    # --- 2. Initialize Environment ---
     echo "--> Injecting secrets..."
     cp /tmp/.env.sops /app/.env
     
@@ -33,33 +47,36 @@ let
       count=$((count+1))
     done
 
-    # Check for First Run
-    if [ ! -f /app/var/.installed ]; then
-        echo "--> FIRST RUN: Initializing..."
-        
-        echo "--> Running Migrations..."
-        php artisan migrate --seed --force
+    echo "--> Running Migrations..."
+    php artisan migrate --seed --force
 
-        echo "--> Creating Admin User..."
+    # --- 3. Smart User Creation ---
+    # We use 'tinker' to check if the specific email exists in the DB.
+    # This is safe to run on every boot and recovers from partial installs.
+    echo "--> Checking for Admin User..."
+    USER_EXISTS=$(php artisan tinker --execute="echo \Pterodactyl\Models\User::where('email', 'admin@tongatime.us')->exists() ? 'YES' : 'NO';" | grep "YES" || true)
+
+    if [ "$USER_EXISTS" = "YES" ]; then
+        echo "--> Admin user 'admin@tongatime.us' already exists. Skipping creation."
+    else
+        echo "--> Admin user not found. Creating..."
         ADMIN_PASS=$(cat /run/secrets/admin_password)
         
-        # FIX: Using kebab-case flags (--name-first)
+        # We use || true here just in case of a race condition or edge case, 
+        # so it doesn't crash the container loop.
         php artisan p:user:make \
           --email="admin@tongatime.us" \
           --username="admin" \
           --name-first="Admin" \
           --name-last="User" \
           --password="$ADMIN_PASS" \
-          --admin=1
-
-        echo "--> Setup Complete."
-        touch /app/var/.installed
-    else
-        echo "--> Existing installation found."
-        echo "--> Running migrations on boot..."
-        php artisan migrate --force
+          --admin=1 || echo "Warning: User creation returned an error code, possibly already exists."
     fi
 
+    echo "--> Setting Permissions..."
+    chown -R www-data:www-data /app/var /app/storage/logs
+
+    # --- 4. Start Services ---
     echo "--> Starting PHP-FPM..."
     $PHP_FPM --daemonize
 
@@ -75,7 +92,7 @@ let
   '';
 
 in {
-  # --- Secrets Management ---
+  # ---Secrets Management ---
   sops.secrets = {
     "pterodactyl/app_key" = { owner = "root"; };
     "pterodactyl/db_password" = { owner = "root"; };
@@ -183,11 +200,7 @@ in {
       ports = [ "8081:80" ];
       volumes = [
         "${dataDir}/var:/app/var"
-        # We want the image's default nginx config.
-        # "${dataDir}/nginx:/etc/nginx/http.d" 
-        # "${dataDir}/certs:/etc/letsencrypt"
         "${dataDir}/logs:/app/storage/logs"
-        
         "${config.sops.templates."pterodactyl-panel.env".path}:/tmp/.env.sops:ro"
         "${config.sops.secrets."pterodactyl/admin_password".path}:/run/secrets/admin_password:ro"
         "${panelEntrypoint}:/entrypoint.sh:ro"
@@ -240,7 +253,6 @@ in {
     "d ${dataDir}/redis 0700 999 999 - -"
     "d ${dataDir}/var 0755 33 33 - -"
     "d ${dataDir}/logs 0755 33 33 - -"
-    # Removed Nginx/Certs folders from creation since we don't mount them
     "d /var/lib/pterodactyl-wings/data 0700 0 0 - -"
     "d /var/lib/pterodactyl-wings/logs 0700 0 0 - -"
     "d /tmp/pterodactyl-wings 0700 0 0 - -"
