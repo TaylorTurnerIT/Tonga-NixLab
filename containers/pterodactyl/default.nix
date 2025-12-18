@@ -163,6 +163,26 @@ in {
 		data = "/var/lib/pterodactyl/volumes";
 		sftp = { bind_port = 2022; };
 	  };
+
+	  # --- ADD THIS DOCKER BLOCK ---
+      docker = {
+        network = {
+          name = "pterodactyl_nw";
+          is_internal = false;
+          enable_icc = true;
+          network_mode = "bridge";
+          interface = "172.18.0.1";
+        };
+        domainname = "";
+        registries = {};
+        log_driver = {
+            type = "json-file";
+            config = {
+                max-size = "10m";
+                max-file = "3";
+            };
+        };
+      };
 	  
 	  allowed_mounts = [];
 	  remote = "https://panel.tongatime.us";
