@@ -7,6 +7,7 @@
 		./containers/default.nix
 		./network/default.nix
 	];
+	nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
 	# --- BOOTLOADER ---
 	boot.loader.systemd-boot.enable = true;
@@ -68,36 +69,6 @@
 	};
 	sops.secrets.github_mirror_token = {
 		owner = "root";
-	};
-
-	# --- Jexactyl Secrets ---
-	sops.secrets.jexactyl_db_password = { };
-	sops.secrets.jexactyl_db_root_password = { };
-	sops.secrets.jexactyl_app_key = { };
-
-	# Generate the .env file that the container will mount
-	sops.templates."jexactyl.env" = {
-		mode = "0444"; # Allow read-only
-		content = ''
-			APP_ENV=production
-			APP_DEBUG=false
-			APP_KEY=${config.sops.placeholder.jexactyl_app_key}
-			APP_URL=https://panel.tongatime.us
-
-			DB_HOST=127.0.0.1
-			DB_PORT=3306
-			DB_DATABASE=panel
-			DB_USERNAME=jexactyl
-			DB_PASSWORD=${config.sops.placeholder.jexactyl_db_password}
-
-			REDIS_HOST=127.0.0.1
-			REDIS_PORT=6379
-
-			CACHE_DRIVER=redis
-			SESSION_DRIVER=redis
-			QUEUE_CONNECTION=redis
-			RECAPTCHA_ENABLED=false
-		'';
 	};
 
 	# users.users.nixos.openssh.authorizedKeys.keys = [
