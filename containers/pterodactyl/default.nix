@@ -220,11 +220,26 @@ in {
     };
   };
   
-  # --- 5. Permissions ---
+  # --- Permissions ---
+  # We must create every directory that is volume-mapped on the host.
   systemd.tmpfiles.rules = [
-    "d ${dataDir}/mysql 0700 1000 1000 - -"
+    # --- Database (MariaDB) ---
+    # UID 999 is commonly used by mysql/mariadb in containers
+    "d ${dataDir}/mysql 0700 999 999 - -"
+
+    # --- Redis ---
+    # UID 999 is standard for Redis Alpine
+    "d ${dataDir}/redis 0700 999 999 - -"
+
+    # --- Panel (Runs as www-data: 33) ---
     "d ${dataDir}/var 0755 33 33 - -"
     "d ${dataDir}/logs 0755 33 33 - -"
-    "d /var/lib/pterodactyl-wings/data 0700 root root - -"
+    "d ${dataDir}/nginx 0755 33 33 - -"
+    "d ${dataDir}/certs 0755 33 33 - -"
+
+    # --- Wings (Runs as root) ---
+    "d /var/lib/pterodactyl-wings/data 0700 0 0 - -"
+    "d /var/lib/pterodactyl-wings/logs 0700 0 0 - -"
+    "d /tmp/pterodactyl-wings 0700 0 0 - -" # Temp dir for Wings
   ];
 }
