@@ -2,24 +2,19 @@
 
 let
   podmanNetwork = "media_net";
-  podmanSubnet = "10.89.0.0/16"; # Subnet for media containers
+  podmanSubnet = "10.89.0.0/16"; 
   
-  # Common options for LinuxServer.io images
-  # PUID/PGID 1000 usually maps to the primary user, ensuring you can edit files via SMB/SSH.
   commonEnv = {
     PUID = "1000";
     PGID = "1000";
     TZ = "UTC";
   };
 
-  # Shared paths
   mediaDir = "/var/lib/media";
   configDir = "/var/lib/config";
 in {
   
   # --- Networking ---
-  # Create a dedicated bridge network so containers can talk to each other by name
-  # e.g., Sonarr talks to "prowlarr" and "qbittorrent"
   systemd.services."create-${podmanNetwork}-network" = {
     script = ''
       ${pkgs.podman}/bin/podman network exists ${podmanNetwork} || \
@@ -28,52 +23,59 @@ in {
     wantedBy = [ "multi-user.target" ];
   };
 
+  # --- Firewall ---
+  # Allow the media containers to talk to the host (Required for DNS)
+  networking.firewall.extraCommands = ''
+    iptables -A INPUT -s ${podmanSubnet} -j ACCEPT
+  '';
+
   virtualisation.oci-containers.containers = {
 
-    # --- Jellyfin (Media Server) ---
+    # --- Jellyfin ---
     jellyfin = {
       image = "lscr.io/linuxserver/jellyfin:latest";
       autoStart = true;
       extraOptions = [ "--network=${podmanNetwork}" ];
-      ports = [ "8096:8096" ]; # Web UI
+      ports = [ "8096:8096" ]; 
       environment = commonEnv;
       volumes = [
         "${configDir}/jellyfin:/config"
-        "${mediaDir}:/data/media" # Library root
+        "${mediaDir}:/data/media"
       ];
     };
 
-    # --- Prowlarr (Indexer Manager) ---
-    # Handles indexers for Sonarr/Radarr
+    # --- Prowlarr ---
     prowlarr = {
       image = "lscr.io/linuxserver/prowlarr:latest";
       autoStart = true;
       extraOptions = [ "--network=${podmanNetwork}" ];
+      ports = [ "9696:9696" ]; 
       environment = commonEnv;
       volumes = [
         "${configDir}/prowlarr:/config"
       ];
-      # Port 9696 is internal to the network, exposed via Caddy if needed
     };
 
-    # --- Sonarr (TV Shows) ---
+    # --- Sonarr ---
     sonarr = {
       image = "lscr.io/linuxserver/sonarr:latest";
       autoStart = true;
       extraOptions = [ "--network=${podmanNetwork}" ];
+      ports = [ "8989:8989" ]; 
       environment = commonEnv;
       volumes = [
         "${configDir}/sonarr:/config"
-        "${mediaDir}:/data/media" # Needs access to move files
-        "${mediaDir}/downloads:/data/downloads" # Access to downloads
+        "${mediaDir}:/data/media"
+        "${mediaDir}/downloads:/data/downloads"
       ];
     };
 
-    # --- Radarr (Movies) ---
+    # --- Radarr ---
     radarr = {
       image = "lscr.io/linuxserver/radarr:latest";
       autoStart = true;
       extraOptions = [ "--network=${podmanNetwork}" ];
+      ports = [ "7878:7878" ]; 
       environment = commonEnv;
       volumes = [
         "${configDir}/radarr:/config"
@@ -82,11 +84,12 @@ in {
       ];
     };
 
-    # --- QBittorrent (Download Client) ---
+    # --- QBittorrent ---
     qbittorrent = {
       image = "lscr.io/linuxserver/qbittorrent:latest";
       autoStart = true;
       extraOptions = [ "--network=${podmanNetwork}" ];
+      ports = [ "8080:8080" ]; 
       environment = commonEnv // {
         WEBUI_PORT = "8080";
       };
@@ -94,14 +97,10 @@ in {
         "${configDir}/qbittorrent:/config"
         "${mediaDir}/downloads:/data/downloads"
       ];
-      # Expose the WebUI port to the host if you want direct access, 
-      # otherwise Caddy handles it.
-      # ports = [ "8080:8080" ]; 
     };
   };
 
   # --- Persistence ---
-  # Ensure directories exist with correct permissions (UID 1000)
   systemd.tmpfiles.rules = [
     "d ${mediaDir} 0775 1000 1000 - -"
     "d ${mediaDir}/movies 0775 1000 1000 - -"
