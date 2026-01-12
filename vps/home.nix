@@ -54,7 +54,7 @@ let
     }
 
     # QBittorrent
-    qbittorrent.tongatime.us {
+    qbit.tongatime.us {
       reverse_proxy 100.73.119.72:8080
     }
   '';
