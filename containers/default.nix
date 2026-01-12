@@ -9,7 +9,6 @@
   */
   imports = [
     ./homepage.nix
-    # ./minecraft.nix
     ./foundryvtt/foundry_portal.nix
     ./foundryvtt/foundry_chef.nix
     ./observability.nix
