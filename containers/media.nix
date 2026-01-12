@@ -2,7 +2,7 @@
 
 let
   podmanNetwork = "media_net";
-  podmanSubnet = "10.88.0.0/16"; # Subnet for media containers
+  podmanSubnet = "10.89.0.0/16"; # Subnet for media containers
   
   # Common options for LinuxServer.io images
   # PUID/PGID 1000 usually maps to the primary user, ensuring you can edit files via SMB/SSH.
