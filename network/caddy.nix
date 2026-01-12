@@ -154,6 +154,34 @@ in
         extraConfig = "reverse_proxy http://127.0.0.1:8082";
       };
 
+      /*
+        Service:  Media Server Suite (Jellyfin, Sonarr, Radarr)
+                  Media server and management tools for streaming and organizing media.
+
+                  tv.tongatime.us -> Jellyfin Media Server
+                  sonarr.tongatime.us -> Sonarr TV Show Manager
+                  radarr.tongatime.us -> Radarr Movie Manager
+      */
+      "tv.${domain}" = {
+        useACMEHost = domain;
+        extraConfig = "reverse_proxy http://127.0.0.1:8096";
+      };
+
+      "jellyfin.${domain}" = {
+        useACMEHost = domain;
+        extraConfig = "reverse_proxy http://127.0.0.1:8096";
+      };
+
+      "sonarr.${domain}" = {
+        useACMEHost = domain;
+        extraConfig = "reverse_proxy http://127.0.0.1:8989";
+      };
+      
+      "radarr.${domain}" = {
+        useACMEHost = domain;
+        extraConfig = "reverse_proxy http://127.0.0.1:7878";
+      };
+
       /* DEFAULT
         Service:  Homepage (Dashboard)
                   Homepage dashboard for quick access to services and status.

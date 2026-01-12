@@ -16,6 +16,7 @@
     ./gitea.nix
     ./act_runner.nix
     ./pterodactyl/default.nix
+    ./media.nix
   ];
 
   # Global Podman Configuration
