@@ -16,11 +16,30 @@ in {
   
   # --- Networking ---
   systemd.services."create-${podmanNetwork}-network" = {
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+    };
     script = ''
       ${pkgs.podman}/bin/podman network exists ${podmanNetwork} || \
       ${pkgs.podman}/bin/podman network create --subnet ${podmanSubnet} ${podmanNetwork}
     '';
-    wantedBy = [ "multi-user.target" ];
+    # Force this service to run BEFORE the containers
+    before = [ 
+      "podman-jellyfin.service"
+      "podman-prowlarr.service"
+      "podman-sonarr.service"
+      "podman-radarr.service"
+      "podman-qbittorrent.service"
+    ];
+    # Ensure the containers actually require this service to be successful
+    requiredBy = [ 
+      "podman-jellyfin.service"
+      "podman-prowlarr.service"
+      "podman-sonarr.service"
+      "podman-radarr.service"
+      "podman-qbittorrent.service"
+    ];
   };
 
   # --- Firewall ---
