@@ -3,14 +3,11 @@ domains:
     registrar: "none"
     provider: "cloudflare"
     records:
+      # --- Internal Services ---
       - type: A
         name: "@"
         target: "100.73.119.72" # Homelab Tailscale IP
-        proxied: false # No Cloudflare proxy
-      - type: A
-        name: "mc"
-        target: "129.153.13.212" # VPS IP
-        proxied: false
+        proxied: false 
       - type: A
         name: "proxmox"
         target: "100.73.119.72" 
@@ -25,7 +22,7 @@ domains:
         proxied: false
       - type: A
         name: "git"
-        target: "100.73.119.72" # Homelab Tailscale IP
+        target: "100.73.119.72"
         proxied: false
       - type: A
         name: "panel"
@@ -36,18 +33,32 @@ domains:
         target: "100.73.119.72"
         proxied: false
       - type: A
-        name: "tv"
-        target: "100.73.119.72"
+        name: "jellyfin"
+        target: "100.73.119.72" # VPS IP
+        proxied: false
+      
+      # --- VPS Gateway Services ---
+      - type: A
+        name: "mc"
+        target: "129.153.13.212" # VPS IP
         proxied: false
       - type: A
-        name: "jellyfin"
-        target: "100.73.119.72"
+        name: "tv"
+        target: "129.153.13.212" # VPS IP
         proxied: false
       - type: A
         name: "sonarr"
-        target: "100.73.119.72"
+        target: "129.153.13.212" # VPS IP
         proxied: false
       - type: A
         name: "radarr"
-        target: "100.73.119.72"
+        target: "129.153.13.212" # VPS IP
+        proxied: false
+      - type: A
+        name: "prowlarr"
+        target: "129.153.13.212" # VPS IP
+        proxied: false
+      - type: A
+        name: "qbittorrent"
+        target: "129.153.13.212" # VPS IP
         proxied: false
