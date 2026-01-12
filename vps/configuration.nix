@@ -32,9 +32,11 @@
   networking.firewall.enable = true;
   networking.firewall.allowedTCPPorts = [ 
     22    # SSH (We will harden this below)
-    25565 # Minecraft Public Access
     80    # Caddy HTTP (For Layer 4 Proxy health checks)
     443   # Caddy HTTPS (For Layer 4 Proxy health checks)
+  ];
+  networking.firewall.allowedTCPPortRanges = [
+    { from = 25565; to = 25600; }
   ];
   networking.firewall.allowedUDPPorts = [
     41641 # TAILSCALE DIRECT CONNECT (Required for low latency)
