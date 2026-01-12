@@ -89,20 +89,6 @@
       "prowlarr.tongatime.us".extraConfig = "reverse_proxy 100.73.119.72:9696";
       "qbittorrent.tongatime.us".extraConfig = "reverse_proxy 100.73.119.72:8080";
     };
-
-    # The Layer 4 Proxy Configuration
-    extraConfig = ''
-      layer4 {
-        :25565 {
-          route {
-            proxy {
-              # Homelab's Tailscale IP
-              upstream 100.73.119.72:25565 
-            }
-          }
-        }
-      }
-    '';
   };
   
   nix.settings.download-buffer-size = 524288000; # 500MiB
