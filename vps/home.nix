@@ -1,4 +1,4 @@
-{ config, pkgs, pkgs-unstable, ... }:
+{ config, pkgs, pkgs-unstable, lib, ... }:
 
 let
   caddyPackage = pkgs-unstable.caddy.withPlugins {
@@ -6,30 +6,42 @@ let
     hash = "sha256-g3Ca24Boxb9VkSCrNvy1+n5Dfd2n4qEpi2bIOxyNc6g="; 
   };
 
-  # Use JSON for Layer 4 configuration (It is much more reliable for plugins)
+  # --- DYNAMIC CONFIGURATION ---
+  # Define the range of ports
+  portRange = lib.range 25565 25600;
+
+  # Function: Creates a server block for ONE specific port
+  # Returns: { name = "minecraft_25565"; value = { ... }; }
+  mkServer = port: {
+    name = "minecraft_${toString port}";
+    value = {
+      listen = [ ":${toString port}" ];
+      routes = [
+        {
+          handle = [
+            {
+              handler = "proxy";
+              upstreams = [ { dial = [ "100.73.119.72:${toString port}" ]; } ];
+            }
+          ];
+        }
+      ];
+    };
+  };
+
+  # Generate the map of all servers
+  serverMap = builtins.listToAttrs (map mkServer portRange);
+
+  # Assemble the final JSON
   caddyConfig = builtins.toJSON {
     apps = {
       layer4 = {
-        servers = {
-          minecraft = {
-            listen = [ ":25565" ];
-            routes = [
-              {
-                handle = [
-                  {
-                    handler = "proxy";
-                    upstreams = [
-                      { dial = ["100.73.119.72:25565"]; }
-                    ];
-                  }
-                ];
-              }
-            ];
-          };
-        };
+        servers = serverMap;
       };
     };
   };
+
+  
 in
 {
   home.username = "ubuntu";
