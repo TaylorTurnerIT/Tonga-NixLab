@@ -35,3 +35,19 @@ domains:
         name: "node"
         target: "100.73.119.72"
         proxied: false
+      - type: A
+        name: "tv"
+        target: "100.73.119.72"
+        proxied: false
+      - type: A
+        name: "jellyfin"
+        target: "100.73.119.72"
+        proxied: false
+      - type: A
+        name: "sonarr"
+        target: "100.73.119.72"
+        proxied: false
+      - type: A
+        name: "radarr"
+        target: "100.73.119.72"
+        proxied: false
