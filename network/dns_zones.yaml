@@ -10,34 +10,28 @@ domains:
         proxied: false 
       - type: A
         name: "proxmox"
-        target: "100.73.119.72" 
+        target: "100.73.119.72" # Homelab Tailscale IP
         proxied: false
       - type: A
         name: "foundry"
-        target: "100.73.119.72"
+        target: "100.73.119.72" # Homelab Tailscale IP
         proxied: false
       - type: A
         name: "grafana"
-        target: "100.73.119.72"
+        target: "100.73.119.72" # Homelab Tailscale IP
         proxied: false
       - type: A
         name: "git"
-        target: "100.73.119.72"
+        target: "100.73.119.72" # Homelab Tailscale IP  
         proxied: false
       - type: A
         name: "panel"
-        target: "100.73.119.72"
+        target: "100.73.119.72" # Homelab Tailscale IP
         proxied: false
       - type: A
         name: "node"
-        target: "100.73.119.72"
+        target: "100.73.119.72" # Homelab Tailscale IP
         proxied: false
-      - type: A
-        name: "jellyfin"
-        target: "100.73.119.72" # VPS IP
-        proxied: false
-      
-      # --- VPS Gateway Services ---
       - type: A
         name: "mc"
         target: "129.153.13.212" # VPS IP
