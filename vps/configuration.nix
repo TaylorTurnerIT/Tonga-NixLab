@@ -33,6 +33,8 @@
   networking.firewall.allowedTCPPorts = [ 
     22    # SSH (We will harden this below)
     25565 # Minecraft Public Access
+    80    # Caddy HTTP (For Layer 4 Proxy health checks)
+    443   # Caddy HTTPS (For Layer 4 Proxy health checks)
   ];
   networking.firewall.allowedUDPPorts = [
     41641 # TAILSCALE DIRECT CONNECT (Required for low latency)
@@ -78,11 +80,13 @@
       hash = "sha256-g3Ca24Boxb9VkSCrNvy1+n5Dfd2n4qEpi2bIOxyNc6g="; 
     };
 
-    # Global options
-    globalConfig = ''
-      # Optional: Enable debug logs if you are troubleshooting
-      # debug
-    '';
+    virtualHosts = {
+      "tv.tongatime.us".extraConfig = "reverse_proxy 100.73.119.72:8096";
+      "sonarr.tongatime.us".extraConfig = "reverse_proxy 100.73.119.72:8989";
+      "radarr.tongatime.us".extraConfig = "reverse_proxy 100.73.119.72:7878";
+      "prowlarr.tongatime.us".extraConfig = "reverse_proxy 100.73.119.72:9696";
+      "qbittorrent.tongatime.us".extraConfig = "reverse_proxy 100.73.119.72:8080";
+    };
 
     # The Layer 4 Proxy Configuration
     extraConfig = ''
