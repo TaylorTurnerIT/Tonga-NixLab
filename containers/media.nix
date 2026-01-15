@@ -133,6 +133,7 @@ in {
         "${mediaDir}/downloads:/data/downloads"
       ];
     };
+  };
 
   # --- Persistence ---
   systemd.tmpfiles.rules = [
@@ -147,4 +148,4 @@ in {
     "d ${configDir}/qbittorrent 0755 1000 1000 - -"
     "d ${configDir}/readarr 0755 1000 1000 - -"
   ];
-}}
+}
