@@ -60,3 +60,7 @@ domains:
         name: "audiobooks"
         target: "129.153.13.212" # VPS IP
         proxied: false
+      - type: A
+        name: "readarr"
+        target: "129.153.13.212" # VPS IP
+        proxied: false
