@@ -117,6 +117,20 @@ in {
         "${mediaDir}/downloads:/data/downloads"
       ];
     };
+
+    # --- Readarr (Books & Audiobooks) ---
+    readarr = {
+      image = "lscr.io/linuxserver/readarr:develop"; # Readarr recommends 'develop' tag
+      autoStart = true;
+      extraOptions = [ "--network=${podmanNetwork}" ];
+      ports = [ "8787:8787" ]; 
+      environment = commonEnv;
+      volumes = [
+        "${configDir}/readarr:/config"
+        "${mediaDir}:/data/media"
+        "${mediaDir}/downloads:/data/downloads"
+      ];
+    };
   };
 
   # --- Persistence ---
@@ -130,5 +144,6 @@ in {
     "d ${configDir}/radarr 0755 1000 1000 - -"
     "d ${configDir}/prowlarr 0755 1000 1000 - -"
     "d ${configDir}/qbittorrent 0755 1000 1000 - -"
+    "d ${configDir}/readarr 0755 1000 1000 - -"
   ];
 }

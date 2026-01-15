@@ -182,6 +182,11 @@ in
         extraConfig = "reverse_proxy http://127.0.0.1:7878";
       };
 
+      "readarr.${domain}" = {
+        useACMEHost = domain;
+        extraConfig = "reverse_proxy http://127.0.0.1:8787";
+      };
+
       /*
         Service: Audiobookshelf
         audiobooks.tongatime.us -> http://127.0.0.1:13378
@@ -194,6 +199,8 @@ in
             flush_interval -1
           }
         '';
+
+        
       };
 
       /* DEFAULT
