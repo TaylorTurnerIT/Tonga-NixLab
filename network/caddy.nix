@@ -167,11 +167,6 @@ in
         extraConfig = "reverse_proxy http://127.0.0.1:8096";
       };
 
-      "jellyfin.${domain}" = {
-        useACMEHost = domain;
-        extraConfig = "reverse_proxy http://127.0.0.1:8096";
-      };
-
       "sonarr.${domain}" = {
         useACMEHost = domain;
         extraConfig = "reverse_proxy http://127.0.0.1:8989";
