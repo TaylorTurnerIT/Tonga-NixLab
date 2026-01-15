@@ -182,6 +182,20 @@ in
         extraConfig = "reverse_proxy http://127.0.0.1:7878";
       };
 
+      /*
+        Service: Audiobookshelf
+        audiobooks.tongatime.us -> http://127.0.0.1:13378
+      */
+      "audiobooks.${domain}" = {
+        useACMEHost = domain;
+        extraConfig = ''
+          reverse_proxy http://127.0.0.1:13378 {
+            # Audiobookshelf requires websocket support (enabled by default in Caddy)
+            flush_interval -1
+          }
+        '';
+      };
+
       /* DEFAULT
         Service:  Homepage (Dashboard)
                   Homepage dashboard for quick access to services and status.

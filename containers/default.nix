@@ -16,6 +16,7 @@
     ./act_runner.nix
     ./pterodactyl/default.nix
     ./media.nix
+    ./audiobookshelf.nix
   ];
 
   # Global Podman Configuration

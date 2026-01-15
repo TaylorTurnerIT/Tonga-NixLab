@@ -57,6 +57,11 @@ let
     qbit.tongatime.us {
       reverse_proxy 100.73.119.72:8080
     }
+
+    # Audiobookshelf
+    audiobooks.tongatime.us {
+      reverse_proxy 100.73.119.72:13378
+    }
   '';
 
 in
