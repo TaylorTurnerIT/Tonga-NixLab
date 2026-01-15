@@ -63,8 +63,8 @@ let
       reverse_proxy 100.73.119.72:13378
     }
 
-    # Readarr
-    readarr.tongatime.us {
+    # Bookshelf
+    bookshelf.tongatime.us {
       reverse_proxy 100.73.119.72:8787
     }
   '';

@@ -64,3 +64,7 @@ domains:
         name: "readarr"
         target: "129.153.13.212" # VPS IP
         proxied: false
+      - type: A
+        name: "bookshelf"
+        target: "129.153.13.212" # VPS IP
+        proxied: false

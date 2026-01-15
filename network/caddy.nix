@@ -182,6 +182,11 @@ in
         extraConfig = "reverse_proxy http://127.0.0.1:8787";
       };
 
+      "bookshelf.${domain}" = {
+        useACMEHost = domain;
+        extraConfig = "reverse_proxy http://127.0.0.1:8787";
+      };
+
       /*
         Service: Audiobookshelf
         audiobooks.tongatime.us -> http://127.0.0.1:13378

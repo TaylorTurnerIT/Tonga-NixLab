@@ -31,6 +31,7 @@ in {
       "podman-sonarr.service"
       "podman-radarr.service"
       "podman-qbittorrent.service"
+      "podman-bookshelf.service"
     ];
     # Ensure the containers actually require this service to be successful
     requiredBy = [ 
@@ -39,6 +40,7 @@ in {
       "podman-sonarr.service"
       "podman-radarr.service"
       "podman-qbittorrent.service"
+      "podman-bookshelf.service"
     ];
   };
 
@@ -118,12 +120,12 @@ in {
       ];
     };
 
-    # --- Readarr (Books & Audiobooks) ---
-    readarr = {
-      image = "lscr.io/linuxserver/readarr:latest";
+    # --- Bookshelf (Readarr Fork) ---
+    bookshelf = {
+      image = "ghcr.io/pennydreadful/bookshelf:hardcover"; # 'hardcover' tag uses the new metadata source
       autoStart = true;
       extraOptions = [ "--network=${podmanNetwork}" ];
-      ports = [ "8787:8787" ]; 
+      ports = [ "8787:8787" ];
       environment = commonEnv;
       volumes = [
         "${configDir}/readarr:/config"
@@ -131,7 +133,6 @@ in {
         "${mediaDir}/downloads:/data/downloads"
       ];
     };
-  };
 
   # --- Persistence ---
   systemd.tmpfiles.rules = [
@@ -146,4 +147,4 @@ in {
     "d ${configDir}/qbittorrent 0755 1000 1000 - -"
     "d ${configDir}/readarr 0755 1000 1000 - -"
   ];
-}
+}}
