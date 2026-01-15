@@ -120,7 +120,7 @@ in {
 
     # --- Readarr (Books & Audiobooks) ---
     readarr = {
-      image = "lscr.io/linuxserver/readarr:develop"; # Readarr recommends 'develop' tag
+      image = "lscr.io/linuxserver/readarr:latest";
       autoStart = true;
       extraOptions = [ "--network=${podmanNetwork}" ];
       ports = [ "8787:8787" ]; 
