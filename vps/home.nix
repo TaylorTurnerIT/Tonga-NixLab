@@ -34,7 +34,7 @@ let
     # --- REVERSE PROXIES (HTTP/HTTPS) ---
     
     # Jellyfin
-    tv.tongatime.us, jellyfin.tongatime.us {
+    tv.tongatime.us {
       reverse_proxy 100.73.119.72:8096
     }
 
