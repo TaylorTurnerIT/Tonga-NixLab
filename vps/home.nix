@@ -53,10 +53,10 @@ let
       reverse_proxy 100.73.119.72:9696
     }
 
-    # QBittorrent
-    qbit.tongatime.us {
-      reverse_proxy 100.73.119.72:8080
-    }
+    # # QBittorrent
+    # qbit.tongatime.us {
+    #   reverse_proxy 100.73.119.72:8080
+    # }
 
     # Audiobookshelf
     audiobooks.tongatime.us {
