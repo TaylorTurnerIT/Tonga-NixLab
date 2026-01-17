@@ -105,20 +105,20 @@ in {
       ];
     };
 
-    # --- QBittorrent ---
-    qbittorrent = {
-      image = "lscr.io/linuxserver/qbittorrent:latest";
-      autoStart = true;
-      extraOptions = [ "--network=${podmanNetwork}" ];
-      ports = [ "8080:8080" ]; 
-      environment = commonEnv // {
-        WEBUI_PORT = "8080";
-      };
-      volumes = [
-        "${configDir}/qbittorrent:/config"
-        "${mediaDir}/downloads:/data/downloads"
-      ];
-    };
+    # # --- QBittorrent ---
+    # qbittorrent = {
+    #   image = "lscr.io/linuxserver/qbittorrent:latest";
+    #   autoStart = true;
+    #   extraOptions = [ "--network=${podmanNetwork}" ];
+    #   ports = [ "8080:8080" ]; 
+    #   environment = commonEnv // {
+    #     WEBUI_PORT = "8080";
+    #   };
+    #   volumes = [
+    #     "${configDir}/qbittorrent:/config"
+    #     "${mediaDir}/downloads:/data/downloads"
+    #   ];
+    # };
 
     # --- Bookshelf (Readarr Fork) ---
     bookshelf = {
