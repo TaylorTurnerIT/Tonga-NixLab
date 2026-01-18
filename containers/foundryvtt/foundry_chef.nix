@@ -43,7 +43,6 @@
         systemd.tmpfiles.rules = [
             "d /var/lib/foundry/chef 0755 1000 1000 - -"
         ];
-
 }
 
 

@@ -69,12 +69,7 @@ let
     }
 
     # Foundry VTT (Portal + Games)
-    foundry.tongatime.us {
-      # One-Off V12 Game
-      handle /oneoff* {
-        reverse_proxy 100.73.119.72:30002
-      }
-      
+    foundry.tongatime.us {      
       # Chef's V13 Game
       handle /chef* {
         reverse_proxy 100.73.119.72:30001
