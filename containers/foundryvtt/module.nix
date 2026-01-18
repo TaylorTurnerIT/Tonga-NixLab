@@ -10,7 +10,7 @@ in {
 
   config = lib.mkIf cfg.enable {
     
-    # 1. Networking Infrastructure
+    # Networking Infrastructure
     # Ensure the bridge network exists so the Portal can attach new game containers to it.
     systemd.services."create-foundry_net-network" = {
       serviceConfig = {
