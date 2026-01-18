@@ -3,7 +3,7 @@
 {
     virtualisation.oci-containers.containers.foundry_chef = {
         # Container image
-        image = "felddy/foundryvtt:13";
+        image = "felddy/foundryvtt:12.343";
         
         # Auto start container on boot
         autoStart = true;
@@ -32,6 +32,9 @@
             # Foundry optimizations 
             FOUNDRY_COMPRESS_WEBSOCKET = "true";
             FOUNDRY_MINIFY_STATIC_FILES = "true";
+
+            FOUNDRY_UID = "1000";
+            FOUNDRY_GID = "1000";
         };
 
         };
@@ -40,6 +43,7 @@
         systemd.tmpfiles.rules = [
             "d /var/lib/foundry/chef 0755 1000 1000 - -"
         ];
+
 }
 
 

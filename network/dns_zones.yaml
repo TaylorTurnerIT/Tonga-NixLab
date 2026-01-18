@@ -13,10 +13,6 @@ domains:
         target: "100.73.119.72" # Homelab Tailscale IP
         proxied: false
       - type: A
-        name: "foundry"
-        target: "100.73.119.72" # Homelab Tailscale IP
-        proxied: false
-      - type: A
         name: "grafana"
         target: "100.73.119.72" # Homelab Tailscale IP
         proxied: false
@@ -62,5 +58,9 @@ domains:
         proxied: false
       - type: A
         name: "bookshelf"
+        target: "129.153.13.212" # VPS IP
+        proxied: false
+      - type: A
+        name: "foundry"
         target: "129.153.13.212" # VPS IP
         proxied: false

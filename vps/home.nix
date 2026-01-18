@@ -67,6 +67,24 @@ let
     bookshelf.tongatime.us {
       reverse_proxy 100.73.119.72:8787
     }
+
+    # Foundry VTT (Portal + Games)
+    foundry.tongatime.us {
+      # One-Off V12 Game
+      handle /oneoff* {
+        reverse_proxy 100.73.119.72:30002
+      }
+      
+      # Chef's V13 Game
+      handle /chef* {
+        reverse_proxy 100.73.119.72:30001
+      }
+
+      # Default to Portal
+      handle {
+        reverse_proxy 100.73.119.72:5000
+      }
+    }
   '';
 
 in

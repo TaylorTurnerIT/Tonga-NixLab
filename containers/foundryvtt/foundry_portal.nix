@@ -10,10 +10,10 @@ let
                 name = "Chef's Games";
                 url = "https://foundry.tongatime.us/chef";
             }
-            # {
-            #     name = "Crunch's Games";
-            #     url = "https://foundry.tongatime.us/crunch";
-            # }
+            {
+                name = "Crunch's Games";
+                url = "https://foundry.tongatime.us/crunch";
+            }
             # {
             #     name = "ColossusDirge's Games";
             #     url = "https://foundry.tongatime.us/colossusdirge";
