@@ -77,6 +77,8 @@ let
             "${config.sops.secrets.foundry_admin_hash.path}:/run/secrets/foundry_admin_hash:ro"
             # Mount the host's persistent directory to /data inside the container
             "/var/lib/foundry-portal:/data:rw" 
+            "/var/run/podman/podman.sock:/var/run/docker.sock" # Control Podman
+            "/var/lib/foundry:/data/foundry:rw"                # Manage World Data
         ];
 
         # Startup Script:
