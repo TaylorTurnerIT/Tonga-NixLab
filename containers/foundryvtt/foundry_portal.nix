@@ -4,7 +4,7 @@ let
     # --- Declarative Configuration ---
     portalConfig = {
         shared_data_mode = false;
-        public_host = "https://foundry.tongatime.us";
+        public_host = "0.0.0.0";
         instances = [];
     };
 
