@@ -4,6 +4,7 @@ let
     # --- Declarative Configuration ---
     portalConfig = {
         shared_data_mode = false;
+        public_host = "https://foundry.tongatime.us";
         instances = [];
     };
 
@@ -59,14 +60,14 @@ in {
         };
     };
 
+    # --- Container Configuration ---
     virtualisation.oci-containers.containers.foundry-portal = {
         image = "foundry-portal:latest";
         autoStart = true;
         extraOptions = [ "--network=host" ];
         
         environment = {
-            FOUNDRY_DATA_DIR = "/var/lib/foundry";
-            # Tells the app that the host socket is mounted here
+            FOUNDRY_DATA_DIR = "/var/lib/foundry"; 
             DOCKER_HOST = "unix:///var/run/docker.sock"; 
         };
 
@@ -78,25 +79,30 @@ in {
             "/var/lib/foundry:/var/lib/foundry:rw"
         ];
 
-        # The startup script is still valid. It creates config.yaml from your declarative config.
-        # The new app will read config.yaml for static settings and create instances.json for dynamic ones.
         cmd = [ 
             "/bin/sh" 
             "-c" 
             ''
+                # 1. Config Management
                 if [ ! -f /data/config.yaml ]; then
                     cp /app/config_declarative.yaml /data/config.yaml
                 fi
                 rm -f /app/config.yaml
                 ln -sf /data/config.yaml /app/config.yaml
 
-                # Initialize instances.json if missing (New requirement)
-                if [ ! -f /data/foundry/instances.json ]; then
-                     echo "{}" > /data/foundry/instances.json
-                     chown 1000:1000 /data/foundry/instances.json
+                if [ ! -f /var/lib/foundry/instances.json ]; then
+                     echo "{}" > /var/lib/foundry/instances.json
+                     chown 1000:1000 /var/lib/foundry/instances.json
                 fi
 
-                # Secret Injection
+                # 2. Patch app.py for Path-Based Routing & Local Scraping
+                # Replace 'public_url = f"{public_host}:{port}"' with path based
+                sed -i 's|public_url = f"{public_host}:{port}"|public_url = f"{public_host}/{name}"|g' app.py
+                
+                # Replace 'internal_url = public_url' with localhost scraping
+                sed -i 's|internal_url = public_url|internal_url = f"http://127.0.0.1:{port}"|g' app.py
+
+                # 3. Secret Injection & Start
                 python -c "import yaml; conf=yaml.safe_load(open('/app/config.yaml')); conf['admin_password_hash']=open('/run/secrets/foundry_admin_hash').read().strip(); yaml.dump(conf, open('/app/config.yaml','w'))" && \
                 
                 python app.py
