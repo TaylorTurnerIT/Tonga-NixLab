@@ -83,7 +83,7 @@ in {
             "/bin/sh" 
             "-c" 
             ''
-                # 1. Config Management
+                # Config Management
                 if [ ! -f /data/config.yaml ]; then
                     cp /app/config_declarative.yaml /data/config.yaml
                 fi
@@ -95,14 +95,20 @@ in {
                      chown 1000:1000 /var/lib/foundry/instances.json
                 fi
 
-                # 2. Patch app.py for Path-Based Routing & Local Scraping
+                # Patch app.py for Path-Based Routing & Local Scraping
                 # Replace 'public_url = f"{public_host}:{port}"' with path based
                 sed -i 's|public_url = f"{public_host}:{port}"|public_url = f"{public_host}/{name}"|g' app.py
                 
                 # Replace 'internal_url = public_url' with localhost scraping
                 sed -i 's|internal_url = public_url|internal_url = f"http://127.0.0.1:{port}"|g' app.py
 
-                # 3. Secret Injection & Start
+                # Ensure the cache directory (created by this root container) is writable by games (uid 1000)
+                mkdir -p /var/lib/foundry/cache
+                chown -R 1000:1000 /var/lib/foundry/cache
+                # Also fix the main dir just in case
+                chown 1000:1000 /var/lib/foundry
+
+                # Secret Injection & Start
                 python -c "import yaml; conf=yaml.safe_load(open('/app/config.yaml')); conf['admin_password_hash']=open('/run/secrets/foundry_admin_hash').read().strip(); yaml.dump(conf, open('/app/config.yaml','w'))" && \
                 
                 python app.py
