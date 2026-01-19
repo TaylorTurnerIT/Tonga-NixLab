@@ -10,8 +10,6 @@
   imports = [
     ./homepage.nix
     ./foundryvtt/foundry_portal.nix
-    ./foundryvtt/foundry_chef.nix
-    ./foundryvtt/oneoff.nix
     ./observability.nix
     ./gitea.nix
     ./act_runner.nix

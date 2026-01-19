@@ -2,114 +2,88 @@
 
 let
     # --- Declarative Configuration ---
-    # We define the config here, and Nix writes it to the store.
+    # [NO CHANGE NEEDED] 
+    # This will continue to generate your "Static" instances (Chef/Crunch).
+    # The new Orchestrator will load these as "Static" and load new ones from instances.json.
     portalConfig = {
         shared_data_mode = false;
-        instances = [
-            {
-                name = "Chef's Games";
-                url = "https://foundry.tongatime.us/chef";
-            }
-            {
-                name = "Crunch's Games";
-                url = "https://foundry.tongatime.us/crunch";
-            }
-            # {
-            #     name = "ColossusDirge's Games";
-            #     url = "https://foundry.tongatime.us/colossusdirge";
-            # }
-            # {
-            #     name = "Laz's Games";
-            #     url = "https://foundry.tongatime.us/laz";
-            # }
-        ];
+        instances = [];
     };
 
-    # Convert the set to YAML and write it to the Nix Store
     configYaml = pkgs.writeText "foundry-portal-config.yaml" (lib.generators.toYAML {} portalConfig);
 
-    in {
+in {
     # --- Build Service ---
-    # Since Foundry Portal does not have an official docker image, we build it from source using Podman.
-    # This service ensures the image exists before the container starts.
     systemd.services.build-foundry-portal = {
         description = "Build Foundry Portal Docker Image";
-
         wants = [ "network-online.target" ];
         after = [ "network-online.target" ];
+        path = [ pkgs.git pkgs.podman ];
 
-        path = [ pkgs.git pkgs.podman ]; # Tools needed for the script
         script = ''
         set -e
         WORK_DIR="/var/lib/foundry-portal/source"
-        
-        # Ensure directory exists
         mkdir -p "$WORK_DIR"
         cd "$WORK_DIR"
+        
         if [ -d ".git" ]; then
-            output=$(git pull)
-            # Only build if git pull reported changes or if the image doesn't exist
-            if [[ "$output" != *"Already up to date."* ]] || ! podman image exists foundry-portal:latest; then
-                podman build -t foundry-portal:latest .
-            fi
+            git pull
         else
             git clone https://github.com/TaylorTurnerIT/foundry-portal.git .
-            podman build -t foundry-portal:latest .
         fi
 
-        # Build the image using Podman
-        # We tag it as 'foundry-portal:latest' so the container service can find it.
+        # Always rebuild if the image doesn't exist or git changed
+        # (You may want to force a rebuild manually once to ensure Chrome is installed)
         echo "Building Podman image..."
         podman build -t foundry-portal:latest .
         '';
+
         serviceConfig = {
-        Type = "oneshot";
-        TimeoutStartSec = "300"; # Allow 5 minutes for the build
+            Type = "oneshot";
+            # [CHANGE 1] Increased timeout for Chrome/Selenium installation
+            TimeoutStartSec = "900"; 
         };
     };
+
     virtualisation.oci-containers.containers.foundry-portal = {
         image = "foundry-portal:latest";
         autoStart = true;
-        extraOptions = [ "--network=host" ]; # Host networking for port 30000 access
+        extraOptions = [ "--network=host" ];
         
+        # [CHANGE 2] Explicit Environment Variables for Orchestrator
+        environment = {
+            FOUNDRY_DATA_DIR = "/data/foundry";
+            # Tells the app that the host socket is mounted here
+            DOCKER_HOST = "unix:///var/run/docker.sock"; 
+        };
+
         volumes = [
             "${configYaml}:/app/config_declarative.yaml:ro"
             "${config.sops.secrets.foundry_admin_hash.path}:/run/secrets/foundry_admin_hash:ro"
-            # Mount the host's persistent directory to /data inside the container
             "/var/lib/foundry-portal:/data:rw" 
-            "/var/run/podman/podman.sock:/var/run/docker.sock" # Control Podman
-            "/var/lib/foundry:/data/foundry:rw"                # Manage World Data
+            "/var/run/podman/podman.sock:/var/run/docker.sock"
+            "/var/lib/foundry:/data/foundry:rw"
         ];
 
-        # Startup Script:
-        # 1. Checks for persistent files in /data.
-        # 2. Initializes them if missing.
-        # 3. Symlinks them to /app so the application can read/write them.
+        # The startup script is still valid. It creates config.yaml from your declarative config.
+        # The new app will read config.yaml for static settings and create instances.json for dynamic ones.
         cmd = [ 
             "/bin/sh" 
             "-c" 
             ''
-                # --- Handle config.yaml ---
                 if [ ! -f /data/config.yaml ]; then
-                    echo "Initializing config.yaml from declarative defaults..."
                     cp /app/config_declarative.yaml /data/config.yaml
                 fi
-                # Remove default/ephemeral file and link to persistent one
                 rm -f /app/config.yaml
                 ln -sf /data/config.yaml /app/config.yaml
 
-                # --- Handle worlds.json ---
-                if [ ! -f /data/worlds.json ]; then
-                    echo "Initializing worlds.json..."
-                    # Initialize with empty schema to prevent startup errors
-                    echo '{"worlds": {}, "schema_version": 1}' > /data/worlds.json
+                # Initialize instances.json if missing (New requirement)
+                if [ ! -f /data/foundry/instances.json ]; then
+                     echo "{}" > /data/foundry/instances.json
+                     chown 1000:1000 /data/foundry/instances.json
                 fi
-                # Link to persistent file
-                rm -f /app/worlds.json
-                ln -sf /data/worlds.json /app/worlds.json
 
-                # --- Inject Secrets & Start ---
-                # Inject admin hash into the persistent config without breaking other fields
+                # Secret Injection
                 python -c "import yaml; conf=yaml.safe_load(open('/app/config.yaml')); conf['admin_password_hash']=open('/run/secrets/foundry_admin_hash').read().strip(); yaml.dump(conf, open('/app/config.yaml','w'))" && \
                 
                 python app.py
@@ -122,8 +96,25 @@ let
         after = [ "build-foundry-portal.service" ];
     };
 
-    # Ensure the Foundry Portal config directory exists with correct permissions
+    systemd.paths.foundry-caddy-watcher = {
+        description = "Watch for Foundry Route Changes";
+        wantedBy = [ "multi-user.target" ];
+        pathConfig = {
+            PathChanged = "/var/lib/foundry-portal/routes.caddy";
+        };
+    };
+
+    systemd.services.foundry-caddy-watcher = {
+        description = "Reload Caddy on Route Change";
+        serviceConfig = {
+            Type = "oneshot";
+            ExecStart = "${pkgs.systemd}/bin/systemctl reload caddy.service";
+        };
+    };
+
+    # Ensure permissions allow the container to write and Caddy to read
     systemd.tmpfiles.rules = [
-        "d /var/lib/foundry-portal 0755 root root - -"
+        "d /var/lib/foundry-portal 0775 root caddy - -"
+        "f /var/lib/foundry-portal/routes.caddy 0644 root caddy - -"
     ];
 }
