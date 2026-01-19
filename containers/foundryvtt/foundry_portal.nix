@@ -2,9 +2,6 @@
 
 let
     # --- Declarative Configuration ---
-    # [NO CHANGE NEEDED] 
-    # This will continue to generate your "Static" instances (Chef/Crunch).
-    # The new Orchestrator will load these as "Static" and load new ones from instances.json.
     portalConfig = {
         shared_data_mode = false;
         instances = [];
@@ -107,9 +104,23 @@ in {
         ];
     };
 
+
+    systemd.services.create-foundry-net = {
+        description = "Create foundry_net Podman network";
+        after = [ "network.target" ];
+        serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+        };
+        path = [ pkgs.podman ];
+        script = ''
+            podman network exists foundry_net || podman network create foundry_net
+        '';
+    };
+    
     systemd.services.podman-foundry-portal = {
-        requires = [ "build-foundry-portal.service" ];
-        after = [ "build-foundry-portal.service" ];
+        requires = [ "build-foundry-portal.service" "create-foundry-net.service" ];
+        after = [ "build-foundry-portal.service" "create-foundry-net.service" ];
     };
 
     systemd.paths.foundry-caddy-watcher = {
