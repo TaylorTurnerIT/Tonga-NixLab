@@ -27,15 +27,33 @@ in {
         cd "$WORK_DIR"
         
         if [ -d ".git" ]; then
-            git pull
-        else
-            git clone https://github.com/TaylorTurnerIT/foundry-portal.git .
-        fi
+            echo "Repo exists. Checking for updates..."
+            
+            # Capture the current commit hash
+            OLD_HASH=$(git rev-parse HEAD)
+            
+            # Fetch and Hard Reset
+            # This fixes the 'divergent branches' error by forcing local to match remote
+            git fetch origin
+            # specific branch logic not needed if we rely on the tracking branch, 
+            # but usually it's 'main'. We use symbolic-ref to find the current branch.
+            BRANCH=$(git rev-parse --abbrev-ref HEAD)
+            git reset --hard "origin/$BRANCH"
+            
+            NEW_HASH=$(git rev-parse HEAD)
 
-        # Always rebuild if the image doesn't exist or git changed
-        # (You may want to force a rebuild manually once to ensure Chrome is installed)
-        echo "Building Podman image..."
-        podman build -t foundry-portal:latest .
+            # Build if hashes differ OR if the image is missing
+            if [ "$OLD_HASH" != "$NEW_HASH" ] || ! podman image exists foundry-portal:latest; then
+                echo "Update detected or image missing. Building..."
+                podman build -t foundry-portal:latest .
+            else
+                echo "Already up to date and image exists."
+            fi
+        else
+            echo "Cloning fresh repository..."
+            git clone https://github.com/TaylorTurnerIT/foundry-portal.git .
+            podman build -t foundry-portal:latest .
+        fi
         '';
 
         serviceConfig = {
