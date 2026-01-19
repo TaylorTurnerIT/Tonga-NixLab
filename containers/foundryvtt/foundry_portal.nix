@@ -155,5 +155,6 @@ in {
     systemd.tmpfiles.rules = [
         "d /var/lib/foundry-portal 0775 root caddy - -"
         "f /var/lib/foundry-portal/routes.caddy 0644 root caddy - -"
+        "d /var/lib/foundry 0775 1000 1000 - -"
     ];
 }
