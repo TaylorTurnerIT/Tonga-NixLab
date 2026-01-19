@@ -58,7 +58,6 @@ in {
 
         serviceConfig = {
             Type = "oneshot";
-            # [CHANGE 1] Increased timeout for Chrome/Selenium installation
             TimeoutStartSec = "900"; 
         };
     };
@@ -68,9 +67,8 @@ in {
         autoStart = true;
         extraOptions = [ "--network=host" ];
         
-        # [CHANGE 2] Explicit Environment Variables for Orchestrator
         environment = {
-            FOUNDRY_DATA_DIR = "/data/foundry";
+            FOUNDRY_DATA_DIR = "/var/lib/foundry";
             # Tells the app that the host socket is mounted here
             DOCKER_HOST = "unix:///var/run/docker.sock"; 
         };
@@ -80,7 +78,7 @@ in {
             "${config.sops.secrets.foundry_admin_hash.path}:/run/secrets/foundry_admin_hash:ro"
             "/var/lib/foundry-portal:/data:rw" 
             "/var/run/podman/podman.sock:/var/run/docker.sock"
-            "/var/lib/foundry:/data/foundry:rw"
+            "/var/lib/foundry:/var/lib/foundry:rw"
         ];
 
         # The startup script is still valid. It creates config.yaml from your declarative config.
