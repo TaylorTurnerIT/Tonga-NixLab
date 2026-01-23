@@ -106,6 +106,10 @@ in
     Service = {
       # Use the Caddyfile adapter
       ExecStart = "${caddyPackage}/bin/caddy run --adapter caddyfile --config %h/.config/caddy/Caddyfile";
+      
+      # Enable hot reloading of the Caddy configuration
+      ExecReload = "${caddyPackage}/bin/caddy reload --adapter caddyfile --config %h/.config/caddy/Caddyfile";
+      
       Restart = "always";
       RestartSec = "10s";
     };
