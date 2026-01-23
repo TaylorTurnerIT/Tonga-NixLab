@@ -33,6 +33,7 @@ in {
       "podman-qbittorrent.service"
       "podman-bookshelf.service"
       "podman-jellyseerr.service"
+      "podman-gluetun.service"
     ];
     # Ensure the containers actually require this service to be successful
     requiredBy = [ 
@@ -43,6 +44,7 @@ in {
       "podman-qbittorrent.service"
       "podman-bookshelf.service"
       "podman-jellyseerr.service"
+      "podman-gluetun.service"
     ];
   };
 
