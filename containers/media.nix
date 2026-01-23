@@ -52,6 +52,11 @@ in {
     iptables -A INPUT -s ${podmanSubnet} -j ACCEPT
   '';
 
+  # --- VPN Secret ---
+  sops.secrets.proton_private_key = {
+    owner = "root"; # Gluetun runs as root
+  };
+
   virtualisation.oci-containers.containers = {
 
     # --- Jellyfin ---
@@ -107,20 +112,55 @@ in {
       ];
     };
 
-    # # --- QBittorrent ---
-    # qbittorrent = {
-    #   image = "lscr.io/linuxserver/qbittorrent:latest";
-    #   autoStart = true;
-    #   extraOptions = [ "--network=${podmanNetwork}" ];
-    #   ports = [ "8080:8080" ]; 
-    #   environment = commonEnv // {
-    #     WEBUI_PORT = "8080";
-    #   };
-    #   volumes = [
-    #     "${configDir}/qbittorrent:/config"
-    #     "${mediaDir}/downloads:/data/downloads"
-    #   ];
-    # };
+    # --- VPN (Gluetun) ---
+    # This container handles the connection to Proton VPN.
+    # qBittorrent will attach to this container's network stack.
+    gluetun = {
+      image = "qmcgaw/gluetun:latest";
+      autoStart = true;
+      extraOptions = [ 
+        "--network=${podmanNetwork}" 
+        "--cap-add=NET_ADMIN"
+        "--device=/dev/net/tun:/dev/net/tun"
+      ];
+      # Expose qBittorrent ports here (since qBit is behind this VPN)
+      ports = [ 
+        "8080:8080" # WebUI
+        "6881:6881" # BitTorrent TCP
+        "6881:6881/udp" # BitTorrent UDP
+      ];
+      environment = {
+        VPN_SERVICE_PROVIDER = "protonvpn";
+        VPN_TYPE = "wireguard";
+        # Mount the secret file
+        WIREGUARD_PRIVATE_KEY_FILE = "/run/secrets/proton_private_key";
+        # SERVER_COUNTRIES = "Switzerland"; 
+        
+        # Enable Port Forwarding (Recommended for torrent performance)
+        VPN_PORT_FORWARDING = "on";
+        VPN_PORT_FORWARDING_PROVIDER = "protonvpn";
+      };
+      volumes = [
+         "${config.sops.secrets.proton_private_key.path}:/run/secrets/proton_private_key:ro"
+         "${configDir}/gluetun:/gluetun"
+      ];
+    };
+
+    # --- QBittorrent ---
+    qbittorrent = {
+      image = "lscr.io/linuxserver/qbittorrent:latest";
+      autoStart = true;
+      extraOptions = [ "--network=container:gluetun" ];
+      
+      environment = commonEnv // {
+        WEBUI_PORT = "8080";
+      };
+      volumes = [
+        "${configDir}/qbittorrent:/config"
+        "${mediaDir}/downloads:/data/downloads"
+      ];
+      dependsOn = [ "gluetun" ];
+    };
 
     # --- Bookshelf (Readarr Fork) ---
     bookshelf = {
@@ -162,5 +202,6 @@ in {
     "d ${configDir}/qbittorrent 0755 1000 1000 - -"
     "d ${configDir}/readarr 0755 1000 1000 - -"
     "d ${configDir}/jellyseerr 0755 1000 1000 - -"
+    "d ${configDir}/gluetun 0755 root root - -"
   ];
 }
