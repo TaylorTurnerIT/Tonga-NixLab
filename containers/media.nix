@@ -53,7 +53,7 @@ in {
   '';
 
   # --- VPN Secret ---
-  sops.secrets.proton_private_key = {
+  sops.secrets.proton_wg0_conf = {
     owner = "root"; # Gluetun runs as root
   };
 
@@ -116,7 +116,7 @@ in {
     # This container handles the connection to Proton VPN.
     # qBittorrent will attach to this container's network stack.
     gluetun = {
-      image = "qmcgaw/gluetun:latest";
+      image = "qmcgaw/gluetun:v3.41.0";
       autoStart = true;
       extraOptions = [ 
         "--network=${podmanNetwork}" 
@@ -130,10 +130,9 @@ in {
         "6881:6881/udp" # BitTorrent UDP
       ];
       environment = {
-        VPN_SERVICE_PROVIDER = "protonvpn";
+        VPN_SERVICE_PROVIDER = "custom";
         VPN_TYPE = "wireguard";
         # Mount the secret file
-        WIREGUARD_PRIVATE_KEY_FILE = "/run/secrets/proton_private_key";
         # SERVER_COUNTRIES = "Switzerland"; 
         
         # Enable Port Forwarding (Recommended for torrent performance)
@@ -141,7 +140,8 @@ in {
         VPN_PORT_FORWARDING_PROVIDER = "protonvpn";
       };
       volumes = [
-         "${config.sops.secrets.proton_private_key.path}:/run/secrets/proton_private_key:ro"
+         # Mount the sops secret directly as the wg0.conf for Gluetun
+         "${config.sops.secrets.proton_wg0_conf.path}:/gluetun/wg0.conf:ro"
          "${configDir}/gluetun:/gluetun"
       ];
     };
