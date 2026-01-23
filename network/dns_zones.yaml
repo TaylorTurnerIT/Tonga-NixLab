@@ -64,3 +64,7 @@ domains:
         name: "foundry"
         target: "129.153.13.212" # VPS IP
         proxied: false
+      - type: A
+        name: "seerr"
+        target: "129.153.13.212" # VPS IP
+        proxied: false

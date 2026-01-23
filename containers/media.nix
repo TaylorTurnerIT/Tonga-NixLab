@@ -32,6 +32,7 @@ in {
       "podman-radarr.service"
       "podman-qbittorrent.service"
       "podman-bookshelf.service"
+      "podman-jellyseerr.service"
     ];
     # Ensure the containers actually require this service to be successful
     requiredBy = [ 
@@ -41,6 +42,7 @@ in {
       "podman-radarr.service"
       "podman-qbittorrent.service"
       "podman-bookshelf.service"
+      "podman-jellyseerr.service"
     ];
   };
 
@@ -133,6 +135,18 @@ in {
         "${mediaDir}/downloads:/data/downloads"
       ];
     };
+
+    # --- Jellyseerr ---
+    jellyseerr = {
+      image = "fallenbagel/jellyseerr:latest";
+      autoStart = true;
+      extraOptions = [ "--network=${podmanNetwork}" ];
+      ports = [ "5055:5055" ];
+      environment = commonEnv;
+      volumes = [
+        "${configDir}/jellyseerr:/app/config"
+      ];
+    };
   };
 
   # --- Persistence ---
@@ -147,5 +161,6 @@ in {
     "d ${configDir}/prowlarr 0755 1000 1000 - -"
     "d ${configDir}/qbittorrent 0755 1000 1000 - -"
     "d ${configDir}/readarr 0755 1000 1000 - -"
+    "d ${configDir}/jellyseerr 0755 1000 1000 - -"
   ];
 }

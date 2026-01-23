@@ -68,6 +68,11 @@ let
       reverse_proxy 100.73.119.72:8787
     }
 
+    # Jellyseerr
+    seerr.tongatime.us {
+      reverse_proxy 100.73.119.72:5055
+    }
+
     # Foundry VTT (Portal + Games)
     foundry.tongatime.us {      
       # Chef's V13 Game
