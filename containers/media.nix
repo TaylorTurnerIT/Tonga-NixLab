@@ -115,8 +115,6 @@ in {
     };
 
     # --- VPN (Gluetun) ---
-    # This container handles the connection to Proton VPN.
-    # qBittorrent will attach to this container's network stack.
     gluetun = {
       image = "qmcgaw/gluetun:v3.41.0";
       autoStart = true;
@@ -125,25 +123,24 @@ in {
         "--cap-add=NET_ADMIN"
         "--device=/dev/net/tun:/dev/net/tun"
       ];
-      # Expose qBittorrent ports here (since qBit is behind this VPN)
       ports = [ 
         "8080:8080" # WebUI
         "6881:6881" # BitTorrent TCP
         "6881:6881/udp" # BitTorrent UDP
       ];
       environment = {
+        # Must be 'custom' to use the mounted wg0.conf file
         VPN_SERVICE_PROVIDER = "custom";
         VPN_TYPE = "wireguard";
-        # Mount the secret file
-        # SERVER_COUNTRIES = "Switzerland"; 
         
-        # Enable Port Forwarding (Recommended for torrent performance)
+        # Enable Port Forwarding via Proton API
+        # Gluetun will read the Endpoint IP from the config file to identify the server
         VPN_PORT_FORWARDING = "on";
         VPN_PORT_FORWARDING_PROVIDER = "protonvpn";
       };
       volumes = [
-         # Mount the sops secret directly as the wg0.conf for Gluetun
-         "${config.sops.secrets.proton_wg0_conf.path}:/gluetun/wg0.conf:ro"
+         # CORRECTED PATH: Must be /gluetun/wireguard/wg0.conf for custom provider
+         "${config.sops.secrets.proton_wg0_conf.path}:/gluetun/wireguard/wg0.conf:ro"
          "${configDir}/gluetun:/gluetun"
       ];
     };
