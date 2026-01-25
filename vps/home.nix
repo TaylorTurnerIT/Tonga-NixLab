@@ -74,15 +74,13 @@ let
     }
 
     # Foundry VTT (Portal + Games)
-    foundry.tongatime.us {      
-      # Chef's V13 Game
-      handle /chef* {
-        reverse_proxy 100.73.119.72:30001
-      }
-
-      # Default to Portal
-      handle {
-        reverse_proxy 100.73.119.72:5000
+    foundry.tongatime.us {
+      # Pass ALL traffic to the Homelab Caddy (which handles dynamic routes)
+      reverse_proxy https://100.73.119.72 {
+        transport http {
+          # Trust the Homelab's certificate for the encrypted Tailscale connection
+          tls_insecure_skip_verify
+        }
       }
     }
   '';
