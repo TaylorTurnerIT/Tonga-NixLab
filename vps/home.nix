@@ -75,10 +75,12 @@ let
 
     # Foundry VTT (Portal + Games)
     foundry.tongatime.us {
-      # Pass ALL traffic to the Homelab Caddy (which handles dynamic routes)
+      # Route ALL traffic to the Homelab Caddy
       reverse_proxy https://100.73.119.72 {
+        header_up Host {upstream_hostport}
         transport http {
-          # Trust the Homelab's certificate for the encrypted Tailscale connection
+          # [CRITICAL] Tell Homelab we are looking for this domain, not the IP
+          tls_server_name foundry.tongatime.us
           tls_insecure_skip_verify
         }
       }
