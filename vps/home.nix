@@ -77,9 +77,8 @@ let
     foundry.tongatime.us {
       # Route ALL traffic to the Homelab Caddy
       reverse_proxy https://100.73.119.72 {
-        header_up Host {upstream_hostport}
+        header_up Host foundry.tongatime.us
         transport http {
-          # [CRITICAL] Tell Homelab we are looking for this domain, not the IP
           tls_server_name foundry.tongatime.us
           tls_insecure_skip_verify
         }

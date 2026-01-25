@@ -57,12 +57,13 @@ in {
             # Align internal path with host path so orchestrator volume mounts work
             FOUNDRY_DATA_DIR = "/var/lib/foundry"; 
             DOCKER_HOST = "unix:///var/run/docker.sock"; 
+            FOUNDRY_DOMAIN = "foundry.tongatime.us"
         };
 
         volumes = [
             "${configYaml}:/app/config_declarative.yaml:ro"
             
-            # [CRITICAL] Secrets Mounting
+            # Secrets Mounting
             # 1. Admin Password for the Portal itself
             "${config.sops.secrets.foundry_admin_hash.path}:/run/secrets/foundry_admin_hash:ro"
             # 2. Bulk Secrets (License/Admin Key) for Child Containers
