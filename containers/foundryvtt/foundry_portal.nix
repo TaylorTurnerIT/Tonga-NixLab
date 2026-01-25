@@ -11,6 +11,9 @@ let
     configYaml = pkgs.writeText "foundry-portal-config.yaml" (lib.generators.toYAML {} portalConfig);
 
 in {
+    # --- Secrets Definitions ---
+    sops.secrets.foundry_license_key = {};
+
     # --- Build Service ---
     systemd.services.build-foundry-portal = {
         description = "Build Foundry Portal Docker Image";
@@ -55,24 +58,28 @@ in {
         
         environment = {
             # Align internal path with host path so orchestrator volume mounts work
-            FOUNDRY_DATA_DIR = "/var/lib/foundry"; 
+            FOUNDRY_DATA_DIR = "/var/lib/foundry";
             DOCKER_HOST = "unix:///var/run/docker.sock"; 
             FOUNDRY_DOMAIN = "foundry.tongatime.us";
+            
+            # --- Non-Secret Control ---
+            # You can now add any arbitrary Foundry env var here, and it will pass through
+            # Example: FOUNDRY_AWS_CONFIG = "true";
         };
 
         volumes = [
             "${configYaml}:/app/config_declarative.yaml:ro"
             
             # Secrets Mounting
-            # 1. Admin Password for the Portal itself
             "${config.sops.secrets.foundry_admin_hash.path}:/run/secrets/foundry_admin_hash:ro"
-            # 2. Bulk Secrets (License/Admin Key) for Child Containers
             "${config.sops.templates."foundry_secrets.json".path}:/run/secrets/foundry_secrets.json:ro"
             
+            # Mount the License Key specifically
+            "${config.sops.secrets.foundry_license_key.path}:/run/secrets/foundry_license_key:ro"
+
             # Persistent Data
             "/var/lib/foundry-portal:/data:rw" 
             "/var/run/podman/podman.sock:/var/run/docker.sock"
-            # Mount host data dir to same path in container
             "/var/lib/foundry:/var/lib/foundry:rw"
         ];
 
@@ -80,6 +87,12 @@ in {
             "/bin/sh" 
             "-c" 
             ''
+                # 0. Inject Secrets into Environment
+                # Read the license key from the mounted secret file and export it as an ENV var
+                if [ -f /run/secrets/foundry_license_key ]; then
+                    export FOUNDRY_LICENSE_KEY=$(cat /run/secrets/foundry_license_key)
+                fi
+
                 # 1. Config Management
                 if [ ! -f /data/config.yaml ]; then
                     cp /app/config_declarative.yaml /data/config.yaml
@@ -94,7 +107,6 @@ in {
                 fi
 
                 # 3. Permission Fixes
-                # Ensure child containers (uid 1000) can write to cache and data
                 mkdir -p /var/lib/foundry/cache
                 chown -R 1000:1000 /var/lib/foundry/cache
                 chown 1000:1000 /var/lib/foundry
