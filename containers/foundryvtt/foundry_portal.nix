@@ -57,7 +57,7 @@ in {
             # Align internal path with host path so orchestrator volume mounts work
             FOUNDRY_DATA_DIR = "/var/lib/foundry"; 
             DOCKER_HOST = "unix:///var/run/docker.sock"; 
-            FOUNDRY_DOMAIN = "foundry.tongatime.us"
+            FOUNDRY_DOMAIN = "foundry.tongatime.us";
         };
 
         volumes = [
