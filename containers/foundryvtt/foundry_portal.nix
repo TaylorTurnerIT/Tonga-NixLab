@@ -47,7 +47,7 @@ in {
         after = [ "network.target" ];
         serviceConfig = { Type = "oneshot"; RemainAfterExit = true; };
         path = [ pkgs.podman ];
-        script = "podman network exists foundry_net || podman network create foundry_net";
+        script = "podman network exists foundry_net || podman network create --dns 1.1.1.1 --dns 8.8.8.8 foundry_net";
     };
 
     # --- Main Container Service ---
