@@ -116,6 +116,9 @@ in {
                 python app.py
             ''
         ];
+    }; 
+    # --- Caddy Reloader Service ---
+    systemd.services.foundry-caddy-reloader = {
         description = "Reload Caddy on Route Change";
         serviceConfig = {
             Type = "oneshot";
