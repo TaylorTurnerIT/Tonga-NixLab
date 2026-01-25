@@ -104,21 +104,6 @@ in {
                 python app.py
             ''
         ];
-    };
-
-    systemd.services.podman-foundry-portal = {
-        requires = [ "build-foundry-portal.service" "create-foundry-net.service" ];
-        after = [ "build-foundry-portal.service" "create-foundry-net.service" ];
-    };
-
-    # --- Path Watcher (Reloads Caddy) ---
-    systemd.paths.foundry-caddy-watcher = {
-        description = "Watch for Foundry Route Changes";
-        wantedBy = [ "multi-user.target" ];
-        pathConfig = { PathChanged = "/var/lib/foundry-portal/routes.caddy"; };
-    };
-
-    systemd.services.foundry-caddy-watcher = {
         description = "Reload Caddy on Route Change";
         serviceConfig = {
             Type = "oneshot";
@@ -130,5 +115,6 @@ in {
         "d /var/lib/foundry-portal 0775 root caddy - -"
         "f /var/lib/foundry-portal/routes.caddy 0644 root caddy - -"
         "d /var/lib/foundry 0775 1000 1000 - -"
+        "L+ /run/secrets/foundry_secrets.json - - - - ${config.sops.templates."foundry_secrets.json".path}"
     ];
 }
