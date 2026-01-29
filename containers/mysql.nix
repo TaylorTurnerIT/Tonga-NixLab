@@ -1,8 +1,8 @@
 { config, pkgs, ... }:
 
 {
-  virtualisation.oci-containers.containers.vaultwarden = {
-    image = "oracle/mysql:oraclelinux9";
+  virtualisation.oci-containers.containers.mysql = {
+    image = "mysql:oraclelinux9";
     autoStart = true;
     
     # Map Host Port 3360 -> Container Port 3306
@@ -10,10 +10,11 @@
 
     volumes = [
       "/var/lib/mysql:/var/lib/mysql"
+      "${config.sops.secrets.mysql_root_password.path}:/run/secrets/mysql_root_password:ro"
     ];
 
     environment = {
-        MYSQL_ROOT_PASSWORD = config.sops.secrets.mysql_root_password;
+        MYSQL_ROOT_PASSWORD_FILE = "/run/secrets/mysql_root_password";
         MYSQL_TCP_PORT = "3306";
     };
   };
