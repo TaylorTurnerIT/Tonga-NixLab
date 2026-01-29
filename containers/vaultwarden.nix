@@ -1,0 +1,37 @@
+{ config, pkgs, ... }:
+
+{
+  virtualisation.oci-containers.containers.vaultwarden = {
+    image = "vaultwarden/server:latest";
+    autoStart = true;
+    
+    # Map Host Port 8222 -> Container Port 80
+    ports = [ "8222:80" ];
+
+    volumes = [
+      "/var/lib/vaultwarden:/data"
+    ];
+
+    environment = {
+      # Security settings
+      SIGNUPS_ALLOWED = "false";
+      INVITATIONS_ALLOWED = "true";
+      
+      # Persistence & Database
+      DATABASE_URL = "sqlite:///data/db.sqlite3";
+      
+      # Admin Portal (Required for first-time setup)
+      ADMIN_TOKEN_FILE = "/run/secrets/vaultwarden_admin_token";
+    };
+  };
+
+  # Define the Secrets in sops
+  sops.secrets.vaultwarden_admin_token = {
+    owner = "root"; # Podman runs as root
+  };
+
+  # Ensure the data directory exists with correct permissions
+  systemd.tmpfiles.rules = [
+    "d /var/lib/vaultwarden 0755 root root - -"
+  ];
+}

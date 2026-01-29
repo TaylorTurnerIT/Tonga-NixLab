@@ -16,6 +16,7 @@
     ./pterodactyl/default.nix
     ./media.nix
     ./audiobookshelf.nix
+    ./vaultwarden.nix 
   ];
 
   # Global Podman Configuration
