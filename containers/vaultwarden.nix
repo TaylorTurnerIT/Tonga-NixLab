@@ -18,10 +18,7 @@
       # Security settings
       SIGNUPS_ALLOWED = "false";
       INVITATIONS_ALLOWED = "true";
-      
-      # Persistence & Database
-      DATABASE_URL = "sqlite:///data/db.sqlite3";
-      
+            
       # Admin Portal (Required for first-time setup)
       ADMIN_TOKEN_FILE = "/run/secrets/vaultwarden_admin_token";
     };
