@@ -196,6 +196,21 @@ in
         
       };
 
+      /*
+        Service: Vaultwarden (Password Manager)
+        Public: vault.tongatime.us -> VPS -> Homelab:8222
+        Private: vault-direct.tongatime.us -> Homelab:8222
+      */
+      "vault.${domain}" = {
+        useACMEHost = domain;
+        extraConfig = "reverse_proxy http://127.0.0.1:8222";
+      };
+
+      "vault-direct.${domain}" = {
+        useACMEHost = domain;
+        extraConfig = "reverse_proxy http://127.0.0.1:8222";
+      };
+
       /* DEFAULT
         Service:  Homepage (Dashboard)
                   Homepage dashboard for quick access to services and status.

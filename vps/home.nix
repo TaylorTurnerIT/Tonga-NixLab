@@ -84,6 +84,11 @@ let
         }
       }
     }
+
+    # Vaultwarden
+    vault.tongatime.us {
+      reverse_proxy 100.73.119.72:8222
+    }
   '';
 
 in
