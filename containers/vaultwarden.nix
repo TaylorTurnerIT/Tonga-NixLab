@@ -10,6 +10,8 @@
 
     volumes = [
       "/var/lib/vaultwarden:/data"
+      # Mount the admin token secret
+        "/run/secrets/vaultwarden_admin_token:/run/secrets/vaultwarden_admin_token:ro"
     ];
 
     environment = {
