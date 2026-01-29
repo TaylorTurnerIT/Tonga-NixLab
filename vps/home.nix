@@ -25,9 +25,16 @@ let
   # --- 2. MAIN CADDYFILE ---
   caddyFileConfig = ''
     {
-      # Global Options for Layer 4 (Minecraft)
+      # Global Options for Layer 4
       layer4 {
         ${minecraftConfig}
+
+        # Forward MySQL Traffic (VPS Port 3306 -> Homelab Port 3360)
+        :3306 {
+          route {
+            proxy 100.73.119.72:3360
+          }
+        }
       }
     }
 
