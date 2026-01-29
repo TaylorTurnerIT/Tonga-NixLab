@@ -89,6 +89,11 @@ let
     vault.tongatime.us {
       reverse_proxy 100.73.119.72:8222
     }
+    
+    # MySQL
+    mysql.tongatime.us {
+      reverse_proxy 100.73.119.72:3360
+    }
   '';
 
 in

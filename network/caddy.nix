@@ -211,6 +211,15 @@ in
         extraConfig = "reverse_proxy http://127.0.0.1:8222";
       };
 
+      /* 
+        Service: MySQL
+        mysql.tongatime.us -> VPS -> Homelab:3360
+      */
+      "mysql.${domain}" = {
+        useACMEHost = domain;
+        extraConfig = "reverse_proxy http://127.0.0.1:3360";
+      };
+
       /* DEFAULT
         Service:  Homepage (Dashboard)
                   Homepage dashboard for quick access to services and status.
