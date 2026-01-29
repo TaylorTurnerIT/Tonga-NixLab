@@ -21,6 +21,9 @@
             
       # Admin Portal (Required for first-time setup)
       ADMIN_TOKEN_FILE = "/run/secrets/vaultwarden_admin_token";
+
+      # Experimental Features
+      EXPERIMENTAL_CLIENT_FEATURE_FLAGS = "ssh-key-vault-item,ssh-agent";
     };
   };
 
