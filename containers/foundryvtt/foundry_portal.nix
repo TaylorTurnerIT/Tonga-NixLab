@@ -14,8 +14,14 @@ in {
     # --- Secrets Definitions ---
     sops.secrets.foundry_license_key = {};
 
-    networking.firewall.extraCommands = ''
+    # --- FIREWALL RULES ---
+	networking.firewall.extraCommands = ''
+      # Allow Access from Container to Host (Input)
       iptables -A INPUT -s ${foundrySubnet} -j ACCEPT
+      
+      # Allow Forwarding (Container to Internet)
+      iptables -A FORWARD -s ${foundrySubnet} -j ACCEPT
+      iptables -A FORWARD -d ${foundrySubnet} -j ACCEPT
     '';
 
     # --- Build Service ---
@@ -134,15 +140,6 @@ in {
         };
     };
 
-    # --- FIREWALL RULES ---
-	networking.firewall.extraCommands = ''
-      # Allow Access from Container to Host (Input)
-      iptables -A INPUT -s ${foundrySubnet} -j ACCEPT
-      
-      # Allow Forwarding (Container to Internet)
-      iptables -A FORWARD -s ${foundrySubnet} -j ACCEPT
-      iptables -A FORWARD -d ${foundrySubnet} -j ACCEPT
-    '';
 
     systemd.tmpfiles.rules = [
         "d /var/lib/foundry-portal 0775 root caddy - -"
