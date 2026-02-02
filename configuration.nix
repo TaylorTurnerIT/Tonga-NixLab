@@ -134,6 +134,7 @@
 		htop
 		nano
 		neofetch
+		podman-tui
 		];
 
 	# --- NIX SETTINGS ---
