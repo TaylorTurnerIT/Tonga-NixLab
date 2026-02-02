@@ -117,12 +117,15 @@
 			dns = [ "1.1.1.1" "8.8.8.8" ];
 		};
 	
+  	};
+
+	# --- CONTAINER SETTINGS ---
 	virtualisation.containers.containersConf.settings = {
 		engine = {
 			# Send SIGKILL after 2 seconds (default is 10)
 			stop_timeout = 2;
+		};
 	};
-  };
 
 
 	# Allow rootless containers to bind to privileged ports (<1024)
