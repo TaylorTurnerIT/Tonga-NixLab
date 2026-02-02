@@ -9,7 +9,7 @@ let
         instances = [];
     };
     configYaml = pkgs.writeText "foundry-portal-config.yaml" (lib.generators.toYAML {} portalConfig);
-    foundrySubnet = "10.88.0.0/16";
+    foundrySubnet = "10.200.0.0/16";
 in {
     # --- Secrets Definitions ---
     sops.secrets.foundry_license_key = {};
@@ -133,6 +133,16 @@ in {
             ExecStart = "${pkgs.systemd}/bin/systemctl reload caddy.service";
         };
     };
+
+    # --- FIREWALL RULES ---
+	networking.firewall.extraCommands = ''
+      # Allow Access from Container to Host (Input)
+      iptables -A INPUT -s ${foundrySubnet} -j ACCEPT
+      
+      # Allow Forwarding (Container to Internet)
+      iptables -A FORWARD -s ${foundrySubnet} -j ACCEPT
+      iptables -A FORWARD -d ${foundrySubnet} -j ACCEPT
+    '';
 
     systemd.tmpfiles.rules = [
         "d /var/lib/foundry-portal 0775 root caddy - -"
