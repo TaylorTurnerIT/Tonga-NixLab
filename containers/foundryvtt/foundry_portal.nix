@@ -92,6 +92,10 @@ in {
                 if [ -f /run/secrets/foundry_license_key ]; then
                     export FOUNDRY_LICENSE_KEY=$(cat /run/secrets/foundry_license_key)
                 fi
+                # Apply other secrets from JSON file
+                if [ -f /run/secrets/foundry_secrets.json ]; then
+                    export $(jq -r 'to_entries|map("\(.key)=\(.value|tostring)")|.[]' /run/secrets/foundry_secrets.json)
+                fi
 
                 # 1. Config Management
                 if [ ! -f /data/config.yaml ]; then
