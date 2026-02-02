@@ -9,10 +9,14 @@ let
         instances = [];
     };
     configYaml = pkgs.writeText "foundry-portal-config.yaml" (lib.generators.toYAML {} portalConfig);
-
+    foundrySubnet = "10.88.0.0/16";
 in {
     # --- Secrets Definitions ---
     sops.secrets.foundry_license_key = {};
+
+    networking.firewall.extraCommands = ''
+      iptables -A INPUT -s ${foundrySubnet} -j ACCEPT
+    '';
 
     # --- Build Service ---
     systemd.services.build-foundry-portal = {
