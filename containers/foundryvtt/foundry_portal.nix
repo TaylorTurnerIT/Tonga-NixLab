@@ -140,6 +140,16 @@ in {
         };
     };
 
+    # --- Path Watcher to Trigger Reload ---
+    systemd.paths.foundry-caddy-watcher = {
+        description = "Watch Foundry Routes for Changes";
+        wantedBy = [ "multi-user.target" ];
+        pathConfig = {
+            PathChanged = "/var/lib/foundry-portal/routes.caddy";
+            Unit = "foundry-caddy-reloader.service";
+        };
+    };
+
 
     systemd.tmpfiles.rules = [
         "d /var/lib/foundry-portal 0775 root caddy - -"
