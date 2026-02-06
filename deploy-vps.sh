@@ -26,13 +26,61 @@ set -e
 
 TARGET_USER="$1"
 
-echo "🔍 Checking remote setup..."
+# --- SYSTEM UPDATES ---
+echo "🔄 Updating System Repositories & Packages..."
+# Prevent interactive prompts (like service restarts) from blocking the script
+export DEBIAN_FRONTEND=noninteractive
+sudo apt-get update -q
+sudo apt-get upgrade -yq
+
+# --- SECURITY TOOLS ---
+echo "🛡️ Installing Host Security Tools (UFW & Fail2Ban)..."
+sudo apt-get install -yq fail2ban ufw
+
+# --- TAILSCALE CONFIGURATION ---
+echo "🪐 Checking Tailscale..."
+if ! command -v tailscale &> /dev/null; then
+    echo "📦 Installing Tailscale..."
+    curl -fsSL https://tailscale.com/install.sh | sh
+fi
+
+# Check if Tailscale is already logged in, otherwise bring it up with SSH enabled
+if ! tailscale status &> /dev/null; then
+    echo "🔑 Tailscale not authenticated. Bringing up (Enable SSH)..."
+    # This may pause to ask for a login URL if not using an auth key
+    sudo tailscale up --ssh
+else
+    echo "✅ Tailscale is already running"
+fi
+
+# --- FIREWALL CONFIGURATION ---
+echo "🧱 Configuring Firewall Rules (UFW)..."
+# Reset UFW to default state to ensure clean slate
+echo "y" | sudo ufw reset > /dev/null
+
+# Default policies: Deny Incoming, Allow Outgoing
+sudo ufw default deny incoming > /dev/null
+sudo ufw default allow outgoing > /dev/null
+
+# Allow Critical Ports
+sudo ufw allow ssh comment 'Allow SSH'
+sudo ufw allow http comment 'Allow Caddy HTTP'
+sudo ufw allow https comment 'Allow Caddy HTTPS'
+sudo ufw allow 41641/udp comment 'Allow Tailscale Direct'
+
+# Enable UFW (non-interactive)
+echo "y" | sudo ufw enable
+echo "✅ Firewall active and secured"
+
+# --- NIX INSTALLATION ---
+echo "🔍 Checking Nix installation..."
 if ! command -v nix-env &> /dev/null; then
     echo "📦 Installing Nix..."
     curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install --no-confirm
 fi
 
-echo "🛡️ Configuring System & Security..."
+# --- NIX CONFIGURATION ---
+echo "⚙️ Configuring Nix Daemon & Permissions..."
 
 # Enable Lingering
 sudo loginctl enable-linger "$TARGET_USER"
@@ -61,7 +109,7 @@ sleep 3
 echo "✓ Verifying configuration..."
 sudo cat /etc/nix/nix.custom.conf | grep -E "(trusted-users|require-sigs)" || echo "⚠️  Warning: config lines not found"
 
-# Swap Configuration
+# --- SWAP CONFIGURATION ---
 if [ ! -f /swapfile ]; then
     echo "💾 Creating 3GB Swap File..."
     sudo fallocate -l 3G /swapfile
