@@ -9,6 +9,9 @@
 	];
 	nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
+	# Automatically Grow Partition When Changed in Proxmox
+	boot.growPartition = true;
+
 	# --- BOOTLOADER ---
 	boot.loader.systemd-boot.enable = true;
 	boot.loader.efi.canTouchEfiVariables = true;
