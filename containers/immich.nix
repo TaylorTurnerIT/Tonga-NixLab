@@ -2,6 +2,7 @@
 
 let
   podmanNetwork = "immich_net";
+  podmanSubnet = "10.91.0.0/16";
   
   # Host Paths (Where data lives on your NixOS server)
   hostUploadDir = "/var/lib/media/photos";
@@ -67,8 +68,9 @@ in {
         IMMICH_MACHINE_LEARNING_URL = "http://immich_machine_learning:3003";
       };
       volumes = [
+        # [CRITICAL CHANGE] Official guide mounts to /data, not /usr/src/app/upload
         "${hostUploadDir}:/data" 
-        "/etc/localtime:/etc/localtime:ro"
+        # "/etc/localtime:/etc/localtime:ro"
         "${config.sops.secrets.immich_db_password.path}:/run/secrets/immich_db_password:ro"
       ];
       dependsOn = [ "immich_redis" "immich_postgres" ];
