@@ -2,7 +2,7 @@
 
 let
   podmanNetwork = "immich_net";
-  podmanSubnet = "10.91.0.0/16";
+  podmanSubnet = "10.90.0.0/16";
   
   # Host Paths (Where data lives on your NixOS server)
   hostUploadDir = "/var/lib/media/photos";
