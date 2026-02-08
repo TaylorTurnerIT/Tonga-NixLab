@@ -88,7 +88,7 @@ in {
 
     # 4. Postgres
     immich-postgres = {
-      image = "postgres:14.20-trixie";
+      image = "tensorchord/pgvecto-rs:pg17-v0.0.0-nightly.20250227-rootless";
       autoStart = true;
       extraOptions = [ "--network=${podmanNetwork}" "--hostname=immich-postgres" ];
       environment = {
