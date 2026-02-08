@@ -96,6 +96,11 @@ let
     vault.tongatime.us {
       reverse_proxy 100.73.119.72:8222
     }
+
+    # Immich
+    photos.tongatime.us {
+      100.73.119.72:2283
+    }
     '';
 
 in
