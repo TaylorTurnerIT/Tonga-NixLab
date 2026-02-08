@@ -220,6 +220,22 @@ in
         extraConfig = "reverse_proxy http://127.0.0.1:3360";
       };
 
+      /*
+        Service: Immich
+        photos.tongatime.us -> VPS -> Homelab:2283
+      */
+      "photos.${domain}" = {
+        useACMEHost = domain;
+        extraConfig = ''
+          reverse_proxy http://127.0.0.1:2283 {
+            # Immich requires large upload limits and timeouts
+            transport http {
+               response_header_timeout 30m
+            }
+          }
+        '';
+      };
+
       /* DEFAULT
         Service:  Homepage (Dashboard)
                   Homepage dashboard for quick access to services and status.

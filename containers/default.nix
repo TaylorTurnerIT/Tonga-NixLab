@@ -18,6 +18,7 @@
     ./audiobookshelf.nix
     ./vaultwarden.nix 
     ./mysql.nix
+    ./immich.nix
   ];
 
   # Global Podman Configuration
