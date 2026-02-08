@@ -2,7 +2,6 @@
 
 let
   podmanNetwork = "immich_net";
-  podmanSubnet = "10.90.0.0/16";
   
   # Host Paths (Where data lives on your NixOS server)
   hostUploadDir = "/var/lib/media/photos";
@@ -32,7 +31,7 @@ in {
     serviceConfig = { Type = "oneshot"; RemainAfterExit = true; };
     script = ''
       ${pkgs.podman}/bin/podman network exists ${podmanNetwork} || \
-      ${pkgs.podman}/bin/podman network create --subnet ${podmanSubnet} ${podmanNetwork}
+      ${pkgs.podman}/bin/podman network create ${podmanNetwork}
     '';
     # Ensure network is up before containers
     before = [
