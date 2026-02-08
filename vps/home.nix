@@ -99,7 +99,7 @@ let
 
     # Immich
     photos.tongatime.us {
-      100.73.119.72:2283
+      reverse_proxy 100.73.119.72:2283
     }
     '';
 
