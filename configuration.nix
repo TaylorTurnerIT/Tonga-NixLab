@@ -19,18 +19,25 @@
 	boot.loader.efi.canTouchEfiVariables = true;
 
 	networking.hostName = "homelab";
+
+	# --- NETWORKING ---
 	networking.networkmanager.enable = true;
 
-	networking.firewall.allowedTCPPorts = [ 2283 ];
+	# Fix Podman DNS by patching the symlink to /nix/store
+	serivces.resolved.enable = true;
+	environment.etc."resolv.conf".source =
+    "/run/systemd/resolve/stub-resolv.conf";
 
-  	networking.firewall.extraCommands = ''
-    # Allow DNS (UDP/TCP 53) from Immich Subnet
-    iptables -I INPUT -s 10.90.0.0/16 -p udp --dport 53 -j ACCEPT
-    iptables -I INPUT -s 10.90.0.0/16 -p tcp --dport 53 -j ACCEPT
-    
-    # Allow all internal traffic from Immich Subnet (Container-to-Container)
-    iptables -I INPUT -s 10.90.0.0/16 -j ACCEPT
-  	'';
+	networking.firewall = {
+		enable = true;
+
+		# Allow DNS on Podman bridge interfaces (container<->aardvark-dns)
+		interfaces."podman+" = {
+			allowedUDPPorts = [ 53 ];
+			allowedTCPPorts = [ 53 ];
+		};
+	};
+
 
 	# --- PROXMOX INTEGRATION ---
 	services.qemuGuest.enable = true; #
@@ -122,7 +129,9 @@
 	virtualisation.podman = {
 		enable = true;
 		dockerCompat = false;
-		defaultNetwork.settings.dns_enabled = true;
+		defaultNetwork.settings = {
+			dns_enabled = true;
+		}
 	};
 
 	# --- DOCKER ---
