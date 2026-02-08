@@ -97,9 +97,12 @@ let
       reverse_proxy 100.73.119.72:8222
     }
 
-    # Immich
+    # Immich Photos
     photos.tongatime.us {
-      reverse_proxy 100.73.119.72:2283
+      reverse_proxy 100.73.119.72:2283 {
+         # Increase buffer for large image uploads
+         flush_interval -1
+      }
     }
     '';
 
