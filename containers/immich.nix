@@ -4,16 +4,24 @@ let
   podmanNetwork = "immich_net";
   podmanSubnet = "10.90.0.0/16";
   
-  uploadDir = "/var/lib/media/photos";
-  dbDir = "/var/lib/immich/postgres";
+  # Host Paths (Where data lives on your NixOS server)
+  hostUploadDir = "/var/lib/media/photos";
+  hostDbDir = "/var/lib/immich/postgres";
   
+  # Configuration matching your provided .env
   commonEnv = {
     PUID = "1000";
     PGID = "1000";
+    TZ = "America/Chicago";
+    IMMICH_VERSION = "v2";
+    
+    # Database Config
     DB_HOSTNAME = "immich-postgres";
     DB_USERNAME = "postgres";
     DB_DATABASE_NAME = "immich";
-    REDIS_HOSTNAME = "immich-redis";
+    
+    # Redis (Valkey) Config
+    REDIS_HOSTNAME = "immich_redis"; # Must match container name below
   };
 
 in {
@@ -26,81 +34,85 @@ in {
       ${pkgs.podman}/bin/podman network exists ${podmanNetwork} || \
       ${pkgs.podman}/bin/podman network create --subnet ${podmanSubnet} ${podmanNetwork}
     '';
-    # [Fix] Explicitly force this to run BEFORE the containers
+    # Ensure network is up before containers
     before = [
       "podman-immich-server.service"
       "podman-immich-machine-learning.service"
-      "podman-immich-redis.service"
-      "podman-immich-postgres.service"
+      "podman-immich_redis.service" # Note the underscore to match official name
+      "podman-immich_postgres.service"
     ];
-    # [Fix] Ensure containers fail if this fails
     requiredBy = [
       "podman-immich-server.service"
       "podman-immich-machine-learning.service"
-      "podman-immich-redis.service"
-      "podman-immich-postgres.service"
+      "podman-immich_redis.service"
+      "podman-immich_postgres.service"
     ];
   };
 
   # --- Persistence ---
   systemd.tmpfiles.rules = [
-    "d ${uploadDir} 0775 1000 1000 - -"
-    "d ${dbDir} 0755 1000 1000 - -"
+    "d ${hostUploadDir} 0775 1000 1000 - -"
+    "d ${hostDbDir} 0755 1000 1000 - -"
   ];
 
   virtualisation.oci-containers.containers = {
     
     # 1. Immich Server
     immich-server = {
-      image = "ghcr.io/immich-app/immich-server:release";
+      image = "ghcr.io/immich-app/immich-server:v2"; # Matches IMMICH_VERSION=v2
       autoStart = true;
       extraOptions = [ "--network=${podmanNetwork}" ];
-      ports = [ "2283:2283"]; 
+      ports = [ "2283:2283" ]; # Official Port
       environment = commonEnv // {
         DB_PASSWORD_FILE = "/run/secrets/immich_db_password";
-        IMMICH_MACHINE_LEARNING_URL = "http://immich-machine-learning:3003";
-        HOST = "0.0.0.0";
+        IMMICH_MACHINE_LEARNING_URL = "http://immich_machine_learning:3003";
       };
       volumes = [
-        "${uploadDir}:/usr/src/app/upload"
+        # [CRITICAL CHANGE] Official guide mounts to /data, not /usr/src/app/upload
+        "${hostUploadDir}:/data" 
         "/etc/localtime:/etc/localtime:ro"
         "${config.sops.secrets.immich_db_password.path}:/run/secrets/immich_db_password:ro"
       ];
-      # Depends on DB/Redis readiness
-      dependsOn = [ "immich-redis" "immich-postgres" ];
+      dependsOn = [ "immich_redis" "immich_postgres" ];
     };
 
     # 2. Machine Learning
-    immich-machine-learning = {
-      image = "ghcr.io/immich-app/immich-machine-learning:release";
+    immich_machine_learning = {
+      image = "ghcr.io/immich-app/immich-machine-learning:v2";
       autoStart = true;
-      extraOptions = [ "--network=${podmanNetwork}" "--hostname=immich-machine-learning" ];
+      extraOptions = [ "--network=${podmanNetwork}" ];
       environment = commonEnv;
-      volumes = [
-        "model-cache:/cache"
+      volumes = [ "model-cache:/cache" ];
+    };
+
+    # 3. Redis (Actually Valkey now)
+    immich_redis = {
+      # Official guide uses Valkey 9
+      image = "docker.io/valkey/valkey:9"; 
+      autoStart = true;
+      extraOptions = [ "--network=${podmanNetwork}" "--hostname=immich_redis" ];
+      # Healthcheck (Podman style)
+      cmd = [ "valkey-server" ];
+    };
+
+    # 4. Postgres (VectorChord)
+    immich_postgres = {
+      # Official guide uses this specific VectorChord image
+      image = "ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0@sha256:bcf63357191b76a916ae5eb93464d65c07511da41e3bf7a8416db519b40b1c23";
+      autoStart = true;
+      extraOptions = [ 
+        "--network=${podmanNetwork}" 
+        "--hostname=immich-postgres" 
+        "--shm-size=128m" # Required by official guide
       ];
-    };
-
-    # 3. Redis
-    immich-redis = { 
-      image = "redis:8.6-rc1-trixie";
-      autoStart = true;
-      extraOptions = [ "--network=${podmanNetwork}" "--hostname=immich-redis" ];
-    };
-
-    # 4. Postgres
-    immich-postgres = {
-      image = "tensorchord/pgvecto-rs:pg14-v0.2.0@sha256:90724186f0a3517cf6914295b5ab410db9ce23190a2d9d0b9dd6463e3fa298f0";
-      autoStart = true;
-      extraOptions = [ "--network=${podmanNetwork}" "--hostname=immich-postgres" ];
       environment = {
         POSTGRES_PASSWORD_FILE = "/run/secrets/immich_db_password";
         POSTGRES_USER = "postgres";
         POSTGRES_DB = "immich";
-        POSTGRES_INITDB_ARGS = "--data-checksums";
+        POSTGRES_INITDB_ARGS = "--data-checksums"; # Required by official guide
       };
       volumes = [
-        "${dbDir}:/var/lib/postgresql/data"
+        "${hostDbDir}:/var/lib/postgresql/data"
         "${config.sops.secrets.immich_db_password.path}:/run/secrets/immich_db_password:ro"
       ];
     };
