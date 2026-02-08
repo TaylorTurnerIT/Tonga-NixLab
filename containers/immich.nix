@@ -2,9 +2,8 @@
 
 let
   podmanNetwork = "immich_net";
-  podmanSubnet = "10.90.0.0/16"; # Unique subnet to avoid conflicts
+  podmanSubnet = "10.90.0.0/16";
   
-  # Configuration Paths
   uploadDir = "/var/lib/media/photos";
   dbDir = "/var/lib/immich/postgres";
   
@@ -19,7 +18,6 @@ let
   };
 
 in {
-  # --- Secrets ---
   sops.secrets.immich_db_password = { owner = "root"; };
 
   # --- Networking ---
@@ -29,6 +27,20 @@ in {
       ${pkgs.podman}/bin/podman network exists ${podmanNetwork} || \
       ${pkgs.podman}/bin/podman network create --subnet ${podmanSubnet} ${podmanNetwork}
     '';
+    # [Fix] Explicitly force this to run BEFORE the containers
+    before = [
+      "podman-immich-server.service"
+      "podman-immich-machine-learning.service"
+      "podman-immich-redis.service"
+      "podman-immich-postgres.service"
+    ];
+    # [Fix] Ensure containers fail if this fails
+    requiredBy = [
+      "podman-immich-server.service"
+      "podman-immich-machine-learning.service"
+      "podman-immich-redis.service"
+      "podman-immich-postgres.service"
+    ];
   };
 
   # --- Persistence ---
@@ -44,7 +56,7 @@ in {
       image = "ghcr.io/immich-app/immich-server:release";
       autoStart = true;
       extraOptions = [ "--network=${podmanNetwork}" ];
-      ports = [ "2283:3001" ]; # Host Port 2283 -> Container 3001
+      ports = [ "2283:3001" ]; 
       environment = commonEnv // {
         DB_PASSWORD_FILE = "/run/secrets/immich_db_password";
         IMMICH_MACHINE_LEARNING_URL = "http://immich-machine-learning:3003";
@@ -54,6 +66,7 @@ in {
         "/etc/localtime:/etc/localtime:ro"
         "${config.sops.secrets.immich_db_password.path}:/run/secrets/immich_db_password:ro"
       ];
+      # Depends on DB/Redis readiness
       dependsOn = [ "immich-redis" "immich-postgres" ];
     };
 
@@ -61,7 +74,7 @@ in {
     immich-machine-learning = {
       image = "ghcr.io/immich-app/immich-machine-learning:release";
       autoStart = true;
-      extraOptions = [ "--network=${podmanNetwork}" ];
+      extraOptions = [ "--network=${podmanNetwork}" "--hostname=immich-machine-learning" ];
       environment = commonEnv;
       volumes = [
         "model-cache:/cache"
@@ -84,6 +97,7 @@ in {
         POSTGRES_PASSWORD_FILE = "/run/secrets/immich_db_password";
         POSTGRES_USER = "postgres";
         POSTGRES_DB = "immich";
+        POSTGRES_INITDB_ARGS = "--data-checksums";
       };
       volumes = [
         "${dbDir}:/var/lib/postgresql/data"
