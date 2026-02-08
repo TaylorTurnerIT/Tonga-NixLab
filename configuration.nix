@@ -21,6 +21,10 @@
 	networking.hostName = "homelab";
 	networking.networkmanager.enable = true;
 
+	# Allow podman networks
+	networking.firewall.interfaces."podman+".allowedUDPPorts = [ 53 5353 ];
+	networking.firewall.interfaces."podman+".allowedTCPPorts = [ 53 ];
+
 	# --- PROXMOX INTEGRATION ---
 	services.qemuGuest.enable = true; #
 	boot.kernelModules = [ "kvm-intel" ]; 
@@ -34,6 +38,8 @@
 		KbdInteractiveAuthentication = false;  # Disable keyboard-interactive auth
 		};
 	};
+
+	
 
 	# --- SOPS Config ---
 	sops.defaultSopsFile = ./secrets/secrets.yaml;
