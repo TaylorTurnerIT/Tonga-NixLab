@@ -68,7 +68,7 @@ in {
       };
       volumes = [
         "${hostUploadDir}:/data" 
-        # "/etc/localtime:/etc/localtime:ro"
+        "/etc/localtime:/etc/localtime:ro"
         "${config.sops.secrets.immich_db_password.path}:/run/secrets/immich_db_password:ro"
       ];
       dependsOn = [ "immich_redis" "immich_postgres" ];
