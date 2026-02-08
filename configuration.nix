@@ -22,8 +22,13 @@
 	networking.networkmanager.enable = true;
 
 	# Allow podman networks
-	networking.firewall.interfaces."podman+".allowedUDPPorts = [ 53 5353 ];
-	networking.firewall.interfaces."podman+".allowedTCPPorts = [ 53 ];
+	networking.firewall.extraCommands = ''
+		# Allow DNS (UDP/TCP 53) from any interface starting with 'podman'
+		iptables -A INPUT -i podman+ -p udp --dport 53 -j ACCEPT
+		iptables -A INPUT -i podman+ -p tcp --dport 53 -j ACCEPT
+
+		iptables -A INPUT -i podman+ -j ACCEPT
+  	'';
 
 	# --- PROXMOX INTEGRATION ---
 	services.qemuGuest.enable = true; #
