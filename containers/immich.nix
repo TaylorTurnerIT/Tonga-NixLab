@@ -55,10 +55,11 @@ in {
       image = "ghcr.io/immich-app/immich-server:release";
       autoStart = true;
       extraOptions = [ "--network=${podmanNetwork}" ];
-      ports = [ "2283:3001" ]; 
+      ports = [ "2283:2283"]; 
       environment = commonEnv // {
         DB_PASSWORD_FILE = "/run/secrets/immich_db_password";
         IMMICH_MACHINE_LEARNING_URL = "http://immich-machine-learning:3003";
+        HOST = "0.0.0.0";
       };
       volumes = [
         "${uploadDir}:/usr/src/app/upload"
