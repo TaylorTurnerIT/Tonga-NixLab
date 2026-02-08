@@ -126,7 +126,7 @@
 	virtualisation.containers.containersConf.settings = {
 		engine = {
 			# Send SIGKILL after 2 seconds (default is 10)
-			stop_timeout = 2;
+			stop_timeout = 0;
 		};
 	};
 
