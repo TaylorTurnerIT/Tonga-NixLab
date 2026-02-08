@@ -23,11 +23,14 @@
 
 	networking.firewall.allowedTCPPorts = [ 2283 ];
 
-	networking.firewall.extraCommands = ''
-    iptables -I INPUT -i podman+ -p udp --dport 53 -j ACCEPT
-    iptables -I INPUT -i podman+ -p tcp --dport 53 -j ACCEPT
-    iptables -I INPUT -i podman+ -j ACCEPT
-	'';
+  	networking.firewall.extraCommands = ''
+    # Allow DNS (UDP/TCP 53) from Immich Subnet
+    iptables -I INPUT -s 10.90.0.0/16 -p udp --dport 53 -j ACCEPT
+    iptables -I INPUT -s 10.90.0.0/16 -p tcp --dport 53 -j ACCEPT
+    
+    # Allow all internal traffic from Immich Subnet (Container-to-Container)
+    iptables -I INPUT -s 10.90.0.0/16 -j ACCEPT
+  	'';
 
 	# --- PROXMOX INTEGRATION ---
 	services.qemuGuest.enable = true; #
