@@ -82,15 +82,15 @@ in {
     };
 
     # 3. Redis
-    immich-redis = {
-      image = "redis:6.2-alpine@sha256:d6c2911ac51b289db208767581a5d154544f2b2fe6fa2868423d0d437763e795";
+    immich-redis = { 
+      image = "redis:8.6-rc1-trixie";
       autoStart = true;
       extraOptions = [ "--network=${podmanNetwork}" "--hostname=immich-redis" ];
     };
 
     # 4. Postgres
     immich-postgres = {
-      image = "tensorchord/pgvecto-rs:pg14-v0.2.0@sha256:90724186f0a3517cf6914295b5ab410db9ce23190a2d9d0b9dd6463e3fa298f0";
+      image = "postgres:14.20-trixie";
       autoStart = true;
       extraOptions = [ "--network=${podmanNetwork}" "--hostname=immich-postgres" ];
       environment = {
