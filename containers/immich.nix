@@ -62,6 +62,7 @@ in {
       };
       volumes = [
         "${uploadDir}:/usr/src/app/upload"
+        "/etc/localtime:/etc/localtime:ro"
         "${config.sops.secrets.immich_db_password.path}:/run/secrets/immich_db_password:ro"
       ];
       # Depends on DB/Redis readiness

@@ -9,6 +9,8 @@
 	];
 	nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
+	time.timeZone = "America/Chicago";
+
 	# Automatically Grow Partition When Changed in Proxmox
 	boot.growPartition = true;
 
