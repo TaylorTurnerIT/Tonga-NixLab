@@ -21,6 +21,8 @@
 	networking.hostName = "homelab";
 	networking.networkmanager.enable = true;
 
+	networking.firewall.allowedTCPPorts = [ 2283 ];
+
 	# Allow podman networks
 	networking.firewall.extraCommands = ''
 		# Allow DNS (UDP/TCP 53) from any interface starting with 'podman'
