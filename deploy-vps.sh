@@ -62,11 +62,12 @@ echo "y" | sudo ufw reset > /dev/null
 sudo ufw default deny incoming > /dev/null
 sudo ufw default allow outgoing > /dev/null
 
-# Allow Critical Ports
+# Allow Ports
 sudo ufw allow ssh comment 'Allow SSH'
 sudo ufw allow http comment 'Allow Caddy HTTP'
 sudo ufw allow https comment 'Allow Caddy HTTPS'
 sudo ufw allow 41641/udp comment 'Allow Tailscale Direct'
+sudo ufw allow 25565:25600/tcp comment 'Allow Minecraft TCP'
 
 # Enable UFW (non-interactive)
 echo "y" | sudo ufw enable
