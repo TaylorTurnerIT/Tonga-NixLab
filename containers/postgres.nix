@@ -30,7 +30,7 @@
 
     volumes = [
       "/var/lib/postgres:/var/lib/postgresql/data"
-      "${config.sops.secrets.postgres_ds_password.path}:/run/secrets/postgres_password:ro"
+      "${config.sops.secrets.postgres_password.path}:/run/secrets/postgres_password:ro"
     ];
 
     environment = {
@@ -42,7 +42,7 @@
   };
 
   # Define the Secret
-  sops.secrets.postgres_ds_password = {
+  sops.secrets.postgres_password = {
     owner = "root"; # Podman runs as root
   };
 
