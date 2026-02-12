@@ -97,6 +97,13 @@ let
       reverse_proxy 100.73.119.72:8222
     }
 
+    # Postgres
+    :5432 {
+          route {
+            proxy 100.73.119.72:5432
+          }
+        }
+
     # Immich Photos
     photos.tongatime.us {
       reverse_proxy 100.73.119.72:2283 {

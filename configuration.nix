@@ -23,6 +23,8 @@
 
 	networking.firewall.allowedTCPPorts = [ 2283 ];
 
+	networking.firewall.allowedUDPPorts = [ 53 ]; 
+
   	networking.firewall.extraCommands = ''
     # Allow DNS (UDP/TCP 53) from Immich Subnet
     iptables -I INPUT -s 10.90.0.0/16 -p udp --dport 53 -j ACCEPT

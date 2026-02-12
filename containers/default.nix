@@ -19,6 +19,7 @@
     ./vaultwarden.nix 
     ./mysql.nix
     ./immich.nix
+    ./postgres.nix
   ];
 
   # Global Podman Configuration

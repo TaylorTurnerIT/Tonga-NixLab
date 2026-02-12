@@ -84,3 +84,7 @@ domains:
         name: "photos"
         target: "129.153.13.212" # VPS IP
         proxied: false
+      - type: A
+        name: "postgres"
+        target: "129.153.13.212" # VPS IP
+        proxied: false
