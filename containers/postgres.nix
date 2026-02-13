@@ -16,7 +16,7 @@
     # 4. max_parallel_workers: Utilize multiple cores for big queries
     cmd = [ 
       "postgres"
-      "-c" "shared_buffers=4GB" 
+      "-c" "shared_buffers=32GB" 
       "-c" "work_mem=64MB"
       "-c" "maintenance_work_mem=512MB"
       "-c" "effective_cache_size=12GB"
