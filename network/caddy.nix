@@ -236,6 +236,15 @@ in
         '';
       };
 
+      /*
+        Service: pgAdmin (Postgres GUI)
+        pgadmin.tongatime.us -> http://127.0.0.1:5050
+      */
+      "pgadmin.${domain}" = {
+        useACMEHost = domain;
+        extraConfig = "reverse_proxy http://127.0.0.1:5050";
+      };
+
       /* DEFAULT
         Service:  Homepage (Dashboard)
                   Homepage dashboard for quick access to services and status.

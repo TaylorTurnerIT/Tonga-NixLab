@@ -20,6 +20,7 @@
     ./mysql.nix
     ./immich.nix
     ./postgres.nix
+    ./pgadmin.nix
   ];
 
   # Global Podman Configuration
