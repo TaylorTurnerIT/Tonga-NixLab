@@ -25,19 +25,10 @@
 
 	networking.firewall.allowedUDPPorts = [ 53 ]; 
 
-  	# --- FIREWALL CONFIGURATION ---
+
+	# --- FIREWALL CONFIGURATION ---
 	networking.firewall.extraCommands = ''
-		# 1. Allow containers to reach the host's internal DNS resolver
-		iptables -I INPUT -s 10.0.0.0/8 -p udp --dport 53 -j ACCEPT
-		iptables -I INPUT -s 10.0.0.0/8 -p tcp --dport 53 -j ACCEPT
-		iptables -I INPUT -s 172.16.0.0/12 -p udp --dport 53 -j ACCEPT
-		iptables -I INPUT -s 172.16.0.0/12 -p tcp --dport 53 -j ACCEPT
-		
-		# 2. Allow containers to reach the external internet (Crucial for apt/nix downloads)
-		iptables -I FORWARD -s 10.0.0.0/8 -j ACCEPT
-		iptables -I FORWARD -s 172.16.0.0/12 -j ACCEPT
-		
-		# 3. Allow Container-to-Container traffic for specific subnets
+		# Allow all internal traffic from Immich Subnet (Container-to-Container)
 		iptables -I INPUT -s 10.90.0.0/16 -j ACCEPT
 	'';
 
@@ -147,12 +138,14 @@
 		};
 	
   	};
-
-	# --- CONTAINER SETTINGS ---
+	
+  	# --- CONTAINER SETTINGS ---
 	virtualisation.containers.containersConf.settings = {
 		engine = {
-			# Send SIGKILL after 2 seconds (default is 10)
 			stop_timeout = 0;
+		};
+		network = {
+			dns_servers = [ "1.1.1.1" "8.8.8.8" ];
 		};
 	};
 
