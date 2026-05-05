@@ -127,6 +127,8 @@
 		defaultNetwork.settings.dns_enabled = true;
 	};
 
+	systemd.sockets.podman.enable = true;
+
 	# --- DOCKER ---
 	virtualisation.docker = {
 		enable = true;
