@@ -25,17 +25,21 @@
 
 	networking.firewall.allowedUDPPorts = [ 53 ]; 
 
-  	networking.firewall.extraCommands = ''
-    # 1. Allow containers to reach the host's internal DNS resolver
-    iptables -I INPUT -s 10.0.0.0/8 -p udp --dport 53 -j ACCEPT
-    iptables -I INPUT -s 10.0.0.0/8 -p tcp --dport 53 -j ACCEPT
-    iptables -I INPUT -s 172.16.0.0/12 -p udp --dport 53 -j ACCEPT
-    iptables -I INPUT -s 172.16.0.0/12 -p tcp --dport 53 -j ACCEPT
-    
-    # 2. Allow containers to reach the external internet (Crucial for fallback DNS and downloading packages)
-    iptables -I FORWARD -s 10.0.0.0/8 -j ACCEPT
-    iptables -I FORWARD -s 172.16.0.0/12 -j ACCEPT
-  	'';
+  	# --- FIREWALL CONFIGURATION ---
+	networking.firewall.extraCommands = ''
+		# 1. Allow containers to reach the host's internal DNS resolver
+		iptables -I INPUT -s 10.0.0.0/8 -p udp --dport 53 -j ACCEPT
+		iptables -I INPUT -s 10.0.0.0/8 -p tcp --dport 53 -j ACCEPT
+		iptables -I INPUT -s 172.16.0.0/12 -p udp --dport 53 -j ACCEPT
+		iptables -I INPUT -s 172.16.0.0/12 -p tcp --dport 53 -j ACCEPT
+		
+		# 2. Allow containers to reach the external internet (Crucial for apt/nix downloads)
+		iptables -I FORWARD -s 10.0.0.0/8 -j ACCEPT
+		iptables -I FORWARD -s 172.16.0.0/12 -j ACCEPT
+		
+		# 3. Allow Container-to-Container traffic for specific subnets
+		iptables -I INPUT -s 10.90.0.0/16 -j ACCEPT
+	'';
 
 	# --- PROXMOX INTEGRATION ---
 	services.qemuGuest.enable = true; #
