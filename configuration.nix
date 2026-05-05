@@ -26,13 +26,11 @@
 	networking.firewall.allowedUDPPorts = [ 53 ]; 
 
   	networking.firewall.extraCommands = ''
-    # Allow DNS (UDP/TCP 53) from ALL Podman bridge interfaces
-    iptables -I INPUT -i podman+ -p udp --dport 53 -j ACCEPT
-    iptables -I INPUT -i podman+ -p tcp --dport 53 -j ACCEPT
-    
-    # Allow DNS (UDP/TCP 53) from Immich Subnet
-    iptables -I INPUT -s 10.90.0.0/16 -p udp --dport 53 -j ACCEPT
-    iptables -I INPUT -s 10.90.0.0/16 -p tcp --dport 53 -j ACCEPT
+    # Allow DNS (UDP/TCP 53) from all local container subnets (Podman/Docker default ranges)
+    iptables -I INPUT -s 10.0.0.0/8 -p udp --dport 53 -j ACCEPT
+    iptables -I INPUT -s 10.0.0.0/8 -p tcp --dport 53 -j ACCEPT
+    iptables -I INPUT -s 172.16.0.0/12 -p udp --dport 53 -j ACCEPT
+    iptables -I INPUT -s 172.16.0.0/12 -p tcp --dport 53 -j ACCEPT
     
     # Allow all internal traffic from Immich Subnet (Container-to-Container)
     iptables -I INPUT -s 10.90.0.0/16 -j ACCEPT
