@@ -16,11 +16,12 @@
     ./pterodactyl/default.nix
     ./media.nix
     ./audiobookshelf.nix
-    ./vaultwarden.nix 
+    ./vaultwarden.nix
     ./mysql.nix
     ./immich.nix
     ./postgres.nix
     ./pgadmin.nix
+    ./attic.nix
   ];
 
   # Global Podman Configuration

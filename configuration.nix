@@ -1,7 +1,7 @@
 { config, pkgs, modulesPath, ... }:
 
 	{
-	imports = [ 
+	imports = [
 		(modulesPath + "/profiles/qemu-guest.nix")
 		./disko-config.nix
 		./containers/default.nix
@@ -23,7 +23,7 @@
 
 	networking.firewall.allowedTCPPorts = [ 2283 ];
 
-	networking.firewall.allowedUDPPorts = [ 53 ]; 
+	networking.firewall.allowedUDPPorts = [ 53 ];
 
 
 	# --- FIREWALL CONFIGURATION ---
@@ -34,7 +34,7 @@
 
 	# --- PROXMOX INTEGRATION ---
 	services.qemuGuest.enable = true; #
-	boot.kernelModules = [ "kvm-intel" ]; 
+	boot.kernelModules = [ "kvm-intel" ];
 
 	# --- SERVER HARDENING ---
 	services.openssh = {
@@ -46,7 +46,7 @@
 		};
 	};
 
-	
+
 
 	# --- SOPS Config ---
 	sops.defaultSopsFile = ./secrets/secrets.yaml;
@@ -91,7 +91,7 @@
 
 	# users.users.nixos.openssh.authorizedKeys.keys = [
 	#   # Public Keys default nixos user
-	# "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJB9MG22hSHdYpwIWFRanUF88YvOYNcrV1zxAvv2RDJt taylort3450@syn-2600-6c5d-567f-3f2b-c338-35e0-ec14-df45.biz6.spectrum.com" 
+	# "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJB9MG22hSHdYpwIWFRanUF88YvOYNcrV1zxAvv2RDJt taylort3450@syn-2600-6c5d-567f-3f2b-c338-35e0-ec14-df45.biz6.spectrum.com"
 	# ];
 
 	users.users.root.openssh.authorizedKeys.keys =  [
@@ -115,32 +115,12 @@
 		subUidRanges = [{ startUid = 100000; count = 65536; }];
 		subGidRanges = [{ startGid = 100000; count = 65536; }];
 	};
+# Declare the SOPS secret
+sops.secrets.attic_env = {
+	owner = "root";
+};
 
-	services.atticd = {
-		enable = true;
-
-		# Use the SOPS-decrypted file to inject the password and JWT secret
-		environmentFile = config.sops.secrets.attic_env.path;
-		
-		settings = {
-			listen = "[::]:8080";
-			allowed-hosts = [ "cache.tongatime.us" ];
-			api-endpoint = "https://cache.tongatime.us/";
-			
-			storage = {
-			type = "local";
-			path = "/var/lib/atticd/storage";
-			};
-		};
-	};
-
-	# Declare the SOPS secret
-	sops.secrets.attic_env = {
-		owner = "atticd";
-		group = "atticd";
-	};
-
-	users.groups.podman-services = {};
+users.groups.podman-services = {};
 
 	# --- PODMAN ---
 	virtualisation.podman = {
@@ -160,9 +140,9 @@
 		daemon.settings = {
 			dns = [ "1.1.1.1" "8.8.8.8" ];
 		};
-	
+
   	};
-	
+
   	# --- CONTAINER SETTINGS ---
 	virtualisation.containers.containersConf.settings = {
 		engine = {
@@ -178,8 +158,8 @@
 	boot.kernel.sysctl."net.ipv4.ip_unprivileged_port_start" = 0;
 
 	# --- PACKAGES ---
-	environment.systemPackages = with pkgs; [ 
-		git 
+	environment.systemPackages = with pkgs; [
+		git
 		htop
 		nano
 		neofetch
@@ -189,5 +169,5 @@
 	# --- NIX SETTINGS ---
 	nix.settings.download-buffer-size = 524288000; # 500MiB
 	# Don't touch
-	system.stateVersion = "25.05"; 
+	system.stateVersion = "25.05";
 }
