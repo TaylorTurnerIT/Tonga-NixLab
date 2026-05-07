@@ -92,3 +92,7 @@ domains:
         name: "pgadmin"
         target: "100.73.119.72" # Homelab Tailscale IP
         proxied: false
+      - type: A
+        name: "cache"
+        target: "100.73.119.72" # Homelab Tailscale IP
+        proxied: false

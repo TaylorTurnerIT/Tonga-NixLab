@@ -116,6 +116,30 @@
 		subGidRanges = [{ startGid = 100000; count = 65536; }];
 	};
 
+	services.atticd = {
+		enable = true;
+
+		# Use the SOPS-decrypted file to inject the password and JWT secret
+		environmentFile = config.sops.secrets.attic_env.path;
+		
+		settings = {
+			listen = "[::]:8080";
+			allowed-hosts = [ "cache.tongatime.us" ];
+			api-endpoint = "https://cache.tongatime.us/";
+			
+			storage = {
+			type = "local";
+			path = "/var/lib/atticd/storage";
+			};
+		};
+	};
+
+	# Declare the SOPS secret
+	sops.secrets.attic_env = {
+		owner = "atticd";
+		group = "atticd";
+	};
+
 	users.groups.podman-services = {};
 
 	# --- PODMAN ---
