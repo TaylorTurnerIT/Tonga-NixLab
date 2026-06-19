@@ -22,6 +22,7 @@
     ./postgres.nix
     ./pgadmin.nix
     ./attic.nix
+    ./odysseus.nix
   ];
 
   # Global Podman Configuration

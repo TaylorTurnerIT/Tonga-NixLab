@@ -257,6 +257,15 @@ in
         extraConfig = "reverse_proxy http://127.0.0.1:3000";
       };
 
+      /*
+        Service: Odysseus
+        ai.tongatime.us -> http://127.0.0.1:7000
+      */
+      "ai.${domain}" = {
+        useACMEHost = domain;
+        extraConfig = "reverse_proxy http://127.0.0.1:7000";
+      };
+
     };
   };
 
