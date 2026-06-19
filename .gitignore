@@ -47,6 +47,9 @@
 # Add markdown files
 !TODO.md
 !README.md
+!AUDIT.md
+!docs/
+!docs/*.md
 
 # Allow SOPS config
 !.sops.yaml

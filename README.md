@@ -130,6 +130,8 @@ To solve the "it works on my machine" problem for deployment, the deployer itsel
 
 ## 🚀 Deployment Guide
 
+👉 **Read [Deploying New Containers](docs/ADDING_CONTAINERS.md) for a step-by-step guide on adding and deploying new services.**
+
 ### Prerequisites
 
   * Podman installed on your local machine.
