@@ -268,7 +268,7 @@ in
 
       /*
         Service: Vane (AI answering engine, slim mode)
-        search.tongatime.us -> http://127.0.0.1:3100 (container port 3000, host 3100)
+        search.tongatime.us -> http://127.0.0.1:3200 (container port 3000, host 3200)
         Internal-only; rejects requests from outside Tailscale / LAN.
       */
       "search.${domain}" = {
@@ -279,7 +279,7 @@ in
           }
           respond @external "Access Denied - Internal Only" 403
 
-          reverse_proxy http://127.0.0.1:3100
+          reverse_proxy http://127.0.0.1:3200
         '';
       };
 

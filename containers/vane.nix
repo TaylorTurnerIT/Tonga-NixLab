@@ -30,7 +30,7 @@ in
       };
 
       ports = [
-        "3100:3000"  # host:3100 → container:3000 (host:3000 is taken by Homepage)
+        "3200:3000"  # host:3200 → container:3000 (3000=Homepage, 3100=Loki)
       ];
 
       volumes = [
