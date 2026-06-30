@@ -22,6 +22,7 @@ in
     vane = {
       image = "docker.io/itzcrazykns1337/vane:slim-latest";
       autoStart = true;
+      dependsOn = [ "gluetun" "searxng" ];
       extraOptions = [ "--network=${podmanNetwork}" ];
 
       environment = {
