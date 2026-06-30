@@ -23,6 +23,7 @@
     ./pgadmin.nix
     ./attic.nix
     ./odysseus.nix
+    ./vane.nix
   ];
 
   # Global Podman Configuration

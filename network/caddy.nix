@@ -258,12 +258,20 @@ in
       };
 
       /*
-        Service: Odysseus
-        ai.tongatime.us -> http://127.0.0.1:7000
+        Service: Vane (AI answering engine, slim mode)
+        ai.tongatime.us -> http://127.0.0.1:3100 (container port 3000, host 3100)
+        Internal-only; rejects requests from outside Tailscale / LAN.
       */
       "ai.${domain}" = {
         useACMEHost = domain;
-        extraConfig = "reverse_proxy http://127.0.0.1:7000";
+        extraConfig = ''
+          @external {
+            not remote_ip 100.64.0.0/10 192.168.0.0/16 127.0.0.0/8
+          }
+          respond @external "Access Denied - Internal Only" 403
+
+          reverse_proxy http://127.0.0.1:3100
+        '';
       };
 
     };
