@@ -96,3 +96,7 @@ domains:
         name: "cache"
         target: "100.73.119.72" # Homelab Tailscale IP
         proxied: false
+      - type: A
+        name: "search"
+        target: "100.73.119.72" # Homelab Tailscale IP
+        proxied: false

@@ -258,11 +258,20 @@ in
       };
 
       /*
-        Service: Vane (AI answering engine, slim mode)
-        ai.tongatime.us -> http://127.0.0.1:3100 (container port 3000, host 3100)
-        Internal-only; rejects requests from outside Tailscale / LAN.
+        Service: Odysseus
+        ai.tongatime.us -> http://127.0.0.1:7000
       */
       "ai.${domain}" = {
+        useACMEHost = domain;
+        extraConfig = "reverse_proxy http://127.0.0.1:7000";
+      };
+
+      /*
+        Service: Vane (AI answering engine, slim mode)
+        search.tongatime.us -> http://127.0.0.1:3100 (container port 3000, host 3100)
+        Internal-only; rejects requests from outside Tailscale / LAN.
+      */
+      "search.${domain}" = {
         useACMEHost = domain;
         extraConfig = ''
           @external {
