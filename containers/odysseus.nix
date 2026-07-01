@@ -11,7 +11,6 @@ in
   systemd.tmpfiles.rules = [
     "d ${configDir}/searxng 0755 root root - -"
     "d ${configDir}/searxng/data 0755 root root - -"
-    "f ${configDir}/searxng/settings.yml 0644 root root - use_default_settings: true\nserver:\n  port: 8081\n  bind_address: \"0.0.0.0\"\n  secret_key: \"odysseus_nixos_deploy_secret\"\nsearch:\n  formats:\n    - html\n    - json\n"
   ];
 
   virtualisation.oci-containers.containers = {
@@ -25,10 +24,11 @@ in
       
       environment = {
         SEARXNG_BASE_URL = "https://ai.tongatime.us/";
+        SEARXNG_PORT = "8081";
+        SEARXNG_SECRET = "odysseus_nixos_deploy_secret_something_long";
       };
       volumes = [
         "${configDir}/searxng/data:/etc/searxng"
-        "${configDir}/searxng/settings.yml:/etc/searxng/settings.yml:ro"
       ];
     };
 

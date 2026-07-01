@@ -69,14 +69,14 @@ in
       Service:  Proxmox Web UI (Proxmox)
                 The Proxmox web interface is used to manage virtual machines and containers.
                 
-                proxmox.tongatime.us -> https://192.168.1.36:8006
+                proxmox.tongatime.us -> https://192.168.4.36:8006
 
                 We are choosing to trust the self-signed certs used by Proxmox internally by skipping TLS verification since it is not exposed to the public internet.
       */
       "proxmox.${domain}" = {
         useACMEHost = domain;
         extraConfig = ''
-          reverse_proxy https://192.168.1.36:8006 {
+          reverse_proxy https://192.168.4.36:8006 {
             transport http {
               tls_insecure_skip_verify # Proxmox uses self-signed certs internally
             }
@@ -263,7 +263,46 @@ in
       */
       "ai.${domain}" = {
         useACMEHost = domain;
-        extraConfig = "reverse_proxy http://127.0.0.1:7000";
+        extraConfig = ''
+          @external {
+            not remote_ip 100.64.0.0/10 192.168.0.0/16 127.0.0.0/8
+          }
+          respond @external "Access Denied - Internal Only" 403
+          
+          reverse_proxy http://127.0.0.1:7000
+        '';
+      };
+
+      /*
+        Service: Omnigent
+        omni.tongatime.us -> http://127.0.0.1:8000
+      */
+      "omni.${domain}" = {
+        useACMEHost = domain;
+        extraConfig = ''
+          @external {
+            not remote_ip 100.64.0.0/10 192.168.0.0/16 127.0.0.0/8
+          }
+          respond @external "Access Denied - Internal Only" 403
+          
+          reverse_proxy http://127.0.0.1:8000
+        '';
+      };
+
+      /*
+        Service: Vane (Search)
+        search.tongatime.us -> http://127.0.0.1:3002
+      */
+      "search.${domain}" = {
+        useACMEHost = domain;
+        extraConfig = ''
+          @external {
+            not remote_ip 100.64.0.0/10 192.168.0.0/16 127.0.0.0/8
+          }
+          respond @external "Access Denied - Internal Only" 403
+          
+          reverse_proxy http://127.0.0.1:3002
+        '';
       };
 
     };

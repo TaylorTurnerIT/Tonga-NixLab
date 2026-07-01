@@ -5,6 +5,18 @@ domains:
     records:
       # --- Internal Services ---
       - type: A
+        name: "ai"
+        target: "100.73.119.72" # Homelab Tailscale IP
+        proxied: false
+      - type: A
+        name: "omni"
+        target: "100.73.119.72" # Homelab Tailscale IP
+        proxied: false
+      - type: A
+        name: "search"
+        target: "100.73.119.72" # Homelab Tailscale IP
+        proxied: false 
+      - type: A
         name: "@"
         target: "100.73.119.72" # Homelab Tailscale IP
         proxied: false 
