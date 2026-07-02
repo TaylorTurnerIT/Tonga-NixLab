@@ -305,6 +305,22 @@ in
         '';
       };
 
+      /*
+        Service: LiteLLM
+        litellm.tongatime.us -> http://127.0.0.1:4000
+      */
+      "litellm.${domain}" = {
+        useACMEHost = domain;
+        extraConfig = ''
+          @external {
+            not remote_ip 100.64.0.0/10 192.168.0.0/16 127.0.0.0/8
+          }
+          respond @external "Access Denied - Internal Only" 403
+          
+          reverse_proxy http://127.0.0.1:4000
+        '';
+      };
+
     };
   };
 

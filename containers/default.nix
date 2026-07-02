@@ -25,6 +25,7 @@
     ./odysseus.nix
     ./omnigent.nix
     ./vane.nix
+    ./litellm.nix
   ];
 
   # Global Podman Configuration
