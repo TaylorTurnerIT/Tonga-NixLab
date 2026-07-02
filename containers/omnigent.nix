@@ -1,13 +1,10 @@
 { config, pkgs, ... }:
 
-let
-  configDir = "/var/lib/homelab/config";
-in
 {
   systemd.tmpfiles.rules = [
-    "d ${configDir}/omnigent 0755 root root - -"
-    "d ${configDir}/omnigent/data 0755 root root - -"
-    "d ${configDir}/omnigent/db 0755 root root - -"
+    "d /var/lib/omnigent 0755 root root - -"
+    "d /var/lib/omnigent/data 0755 root root - -"
+    "d /var/lib/omnigent/db 0755 root root - -"
   ];
 
   virtualisation.oci-containers.containers = {
@@ -20,7 +17,7 @@ in
         POSTGRES_PASSWORD = "omnigent"; # NOTE: Consider managing this with SOPS in the future
       };
       volumes = [
-        "${configDir}/omnigent/db:/var/lib/postgresql/data"
+        "/var/lib/omnigent/db:/var/lib/postgresql/data"
       ];
       ports = [
         "10.88.0.1:5433:5432" # Bind to podman gateway
@@ -45,7 +42,7 @@ in
         "127.0.0.1:8000:8000"
       ];
       volumes = [
-        "${configDir}/omnigent/data:/data"
+        "/var/lib/omnigent/data:/data"
       ];
     };
   };

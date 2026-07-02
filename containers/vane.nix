@@ -1,12 +1,9 @@
 { config, pkgs, ... }:
 
-let
-  configDir = "/var/lib/homelab/config";
-in
 {
   systemd.tmpfiles.rules = [
-    "d ${configDir}/vane 0755 root root - -"
-    "d ${configDir}/vane/data 0755 root root - -"
+    "d /var/lib/vane 0755 root root - -"
+    "d /var/lib/vane/data 0755 root root - -"
   ];
 
   virtualisation.oci-containers.containers = {
@@ -27,7 +24,7 @@ in
       ];
       
       volumes = [
-        "${configDir}/vane/data:/home/vane/data"
+        "/var/lib/vane/data:/home/vane/data"
       ];
     };
   };
