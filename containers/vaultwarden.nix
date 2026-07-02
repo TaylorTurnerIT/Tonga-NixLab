@@ -16,7 +16,7 @@
 
     environment = {
       # Security settings
-      SIGNUPS_ALLOWED = "true";
+      SIGNUPS_ALLOWED = "false";
       INVITATIONS_ALLOWED = "true";
             
       # Admin Portal (Required for first-time setup)

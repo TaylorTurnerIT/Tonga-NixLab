@@ -28,20 +28,6 @@ let
       # Global Options for Layer 4
       layer4 {
         ${minecraftConfig}
-
-        # Forward MySQL Traffic (VPS Port 3306 -> Homelab Port 3360)
-        :3306 {
-          route {
-            proxy 100.73.119.72:3360
-          }
-        }
-
-        # Postgres
-        :5432 {
-          route {
-            proxy 100.73.119.72:5432
-          }
-        }
       }
     }
 
@@ -52,39 +38,9 @@ let
       reverse_proxy 100.73.119.72:8096
     }
 
-    # Sonarr
-    sonarr.tongatime.us {
-      reverse_proxy 100.73.119.72:8989
-    }
-
-    # Radarr
-    radarr.tongatime.us {
-      reverse_proxy 100.73.119.72:7878
-    }
-
-    # Prowlarr
-    prowlarr.tongatime.us {
-      reverse_proxy 100.73.119.72:9696
-    }
-
-    # QBittorrent
-    qbit.tongatime.us {
-      reverse_proxy 100.73.119.72:8080
-    }
-
     # Audiobookshelf
     audiobooks.tongatime.us {
       reverse_proxy 100.73.119.72:13378
-    }
-
-    # Bookshelf
-    bookshelf.tongatime.us {
-      reverse_proxy 100.73.119.72:8787
-    }
-
-    # Jellyseerr
-    seerr.tongatime.us {
-      reverse_proxy 100.73.119.72:5055
     }
 
     # Foundry VTT (Portal + Games)

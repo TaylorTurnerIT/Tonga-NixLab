@@ -162,22 +162,86 @@ in
 
       "sonarr.${domain}" = {
         useACMEHost = domain;
-        extraConfig = "reverse_proxy http://127.0.0.1:8989";
+        extraConfig = ''
+          @external {
+            not remote_ip 100.64.0.0/10 192.168.0.0/16 127.0.0.0/8
+          }
+          respond @external "Access Denied - Internal Only" 403
+          
+          reverse_proxy http://127.0.0.1:8989
+        '';
       };
       
       "radarr.${domain}" = {
         useACMEHost = domain;
-        extraConfig = "reverse_proxy http://127.0.0.1:7878";
+        extraConfig = ''
+          @external {
+            not remote_ip 100.64.0.0/10 192.168.0.0/16 127.0.0.0/8
+          }
+          respond @external "Access Denied - Internal Only" 403
+          
+          reverse_proxy http://127.0.0.1:7878
+        '';
       };
 
       "readarr.${domain}" = {
         useACMEHost = domain;
-        extraConfig = "reverse_proxy http://127.0.0.1:8787";
+        extraConfig = ''
+          @external {
+            not remote_ip 100.64.0.0/10 192.168.0.0/16 127.0.0.0/8
+          }
+          respond @external "Access Denied - Internal Only" 403
+          
+          reverse_proxy http://127.0.0.1:8787
+        '';
       };
 
       "bookshelf.${domain}" = {
         useACMEHost = domain;
-        extraConfig = "reverse_proxy http://127.0.0.1:8787";
+        extraConfig = ''
+          @external {
+            not remote_ip 100.64.0.0/10 192.168.0.0/16 127.0.0.0/8
+          }
+          respond @external "Access Denied - Internal Only" 403
+          
+          reverse_proxy http://127.0.0.1:8787
+        '';
+      };
+
+      "prowlarr.${domain}" = {
+        useACMEHost = domain;
+        extraConfig = ''
+          @external {
+            not remote_ip 100.64.0.0/10 192.168.0.0/16 127.0.0.0/8
+          }
+          respond @external "Access Denied - Internal Only" 403
+          
+          reverse_proxy http://127.0.0.1:9696
+        '';
+      };
+
+      "qbit.${domain}" = {
+        useACMEHost = domain;
+        extraConfig = ''
+          @external {
+            not remote_ip 100.64.0.0/10 192.168.0.0/16 127.0.0.0/8
+          }
+          respond @external "Access Denied - Internal Only" 403
+          
+          reverse_proxy http://127.0.0.1:8080
+        '';
+      };
+
+      "seerr.${domain}" = {
+        useACMEHost = domain;
+        extraConfig = ''
+          @external {
+            not remote_ip 100.64.0.0/10 192.168.0.0/16 127.0.0.0/8
+          }
+          respond @external "Access Denied - Internal Only" 403
+          
+          reverse_proxy http://127.0.0.1:5055
+        '';
       };
 
       /*
@@ -217,7 +281,14 @@ in
       */
       "mysql.${domain}" = {
         useACMEHost = domain;
-        extraConfig = "reverse_proxy http://127.0.0.1:3360";
+        extraConfig = ''
+          @external {
+            not remote_ip 100.64.0.0/10 192.168.0.0/16 127.0.0.0/8
+          }
+          respond @external "Access Denied - Internal Only" 403
+          
+          reverse_proxy http://127.0.0.1:3360
+        '';
       };
 
       /*

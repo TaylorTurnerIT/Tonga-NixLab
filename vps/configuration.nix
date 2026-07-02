@@ -84,10 +84,6 @@
 
     virtualHosts = {
       "tv.tongatime.us".extraConfig = "reverse_proxy 100.73.119.72:8096";
-      "sonarr.tongatime.us".extraConfig = "reverse_proxy 100.73.119.72:8989";
-      "radarr.tongatime.us".extraConfig = "reverse_proxy 100.73.119.72:7878";
-      "prowlarr.tongatime.us".extraConfig = "reverse_proxy 100.73.119.72:9696";
-      "qbittorrent.tongatime.us".extraConfig = "reverse_proxy 100.73.119.72:8080";
     };
   };
   

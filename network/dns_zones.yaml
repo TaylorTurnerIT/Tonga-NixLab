@@ -50,19 +50,19 @@ domains:
         proxied: false
       - type: A
         name: "sonarr"
-        target: "129.153.13.212" # VPS IP
+        target: "100.73.119.72" # Homelab Tailscale IP
         proxied: false
       - type: A
         name: "radarr"
-        target: "129.153.13.212" # VPS IP
+        target: "100.73.119.72" # Homelab Tailscale IP
         proxied: false
       - type: A
         name: "prowlarr"
-        target: "129.153.13.212" # VPS IP
+        target: "100.73.119.72" # Homelab Tailscale IP
         proxied: false
       - type: A
         name: "qbit"
-        target: "129.153.13.212" # VPS IP
+        target: "100.73.119.72" # Homelab Tailscale IP
         proxied: false
       - type: A
         name: "audiobooks"
@@ -70,7 +70,7 @@ domains:
         proxied: false
       - type: A
         name: "bookshelf"
-        target: "129.153.13.212" # VPS IP
+        target: "100.73.119.72" # Homelab Tailscale IP
         proxied: false
       - type: A
         name: "foundry"
@@ -78,7 +78,7 @@ domains:
         proxied: false
       - type: A
         name: "seerr"
-        target: "129.153.13.212" # VPS IP
+        target: "100.73.119.72" # Homelab Tailscale IP
         proxied: false
       - type: A
         name: "vault"
@@ -90,7 +90,7 @@ domains:
         proxied: false
       - type: A
         name: "mysql"
-        target: "129.153.13.212" # VPS IP
+        target: "100.73.119.72" # Homelab Tailscale IP
         proxied: false
       - type: A
         name: "photos"
@@ -98,7 +98,7 @@ domains:
         proxied: false
       - type: A
         name: "postgres"
-        target: "129.153.13.212" # VPS IP
+        target: "100.73.119.72" # Homelab Tailscale IP
         proxied: false
       - type: A
         name: "pgadmin"
