@@ -59,3 +59,7 @@
 
 # Allow LICENSE
 !LICENSE
+
+# Allow agent workspace customizations
+!.agents/
+!.agents/**
