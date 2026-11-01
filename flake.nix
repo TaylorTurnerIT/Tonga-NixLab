@@ -18,6 +18,16 @@
   };
 
   outputs = { self, nixpkgs, nixpkgs-unstable, home-manager, disko, sops-nix, ... }@inputs: {
+    checks = nixpkgs.lib.genAttrs [ "x86_64-linux" "aarch64-darwin" ] (system:
+      import ./nix/checks.nix {
+        inherit self system;
+        pkgs = import nixpkgs-unstable { inherit system; };
+      });
+
+    devShells = nixpkgs.lib.genAttrs [ "x86_64-linux" "aarch64-darwin" ] (system:
+      let pkgs = import nixpkgs-unstable { inherit system; };
+      in { default = pkgs.mkShell { packages = import ./nix/ci-tools.nix { inherit pkgs; }; }; });
+
     # --- HOME SERVER ---
     nixosConfigurations.homelab = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";

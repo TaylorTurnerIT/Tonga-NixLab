@@ -1,0 +1,63 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", "helpers:pinGitHubActionDigests"],
+  "timezone": "America/Chicago",
+  "schedule": ["before 7am every weekday"],
+  "dependencyDashboard": true,
+  "prConcurrentLimit": 2,
+  "prHourlyLimit": 2,
+  "automerge": false,
+  "rebaseWhen": "behind-base-branch",
+  "enabledManagers": ["nix", "github-actions", "dockerfile", "custom.regex"],
+  "nix": {"enabled": true},
+  "dockerfile": {"managerFilePatterns": ["/(^|/)(Dockerfile|Containerfile)$/"]},
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 7am on monday"]
+  },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^containers/.*\\.nix$/"],
+      "matchStrings": [
+        "(?:image|panel|wings|mariadb|redis)\\s*=\\s*\"(?<depName>[a-z0-9./_-]+):(?<currentValue>[a-zA-Z0-9._-]+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?\""
+      ],
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^vps/.*\\.nix$/"],
+      "matchStrings": [
+        "github.com/(?<depName>mholt/caddy-l4)@(?<currentValue>[^\"]+)"
+      ],
+      "datasourceTemplate": "github-tags",
+      "versioningTemplate": "semver"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.github/workflows/.*\\.yml$/"],
+      "matchStrings": ["--package=renovate@(?<currentValue>[0-9]+\\.[0-9]+\\.[0-9]+)"],
+      "depNameTemplate": "renovate",
+      "datasourceTemplate": "npm"
+    }
+  ],
+  "packageRules": [
+    {"matchManagers": ["nix"], "groupName": "Nix inputs"},
+    {"matchDatasources": ["docker"], "pinDigests": true},
+    {"matchPackageNames": ["localhost/**", "foundry-portal"], "enabled": false},
+    {
+      "matchPackageNames": ["ghcr.io/immich-app/immich-server", "ghcr.io/immich-app/immich-machine-learning"],
+      "groupName": "Immich application images"
+    },
+    {
+      "matchPackageNames": ["mholt/caddy-l4"],
+      "groupName": "Caddy Layer 4 plugin",
+      "prBodyNotes": ["Regenerate the Caddy withPlugins hash for each changed package definition before merging. CI must build the VPS activation package."]
+    },
+    {
+      "matchUpdateTypes": ["major"],
+      "dependencyDashboardApproval": true
+    }
+  ]
+}

@@ -14,6 +14,18 @@
 !flake.nix
 !flake.lock
 
+# Repository checks and dependency updates
+!.github/
+!.github/workflows/
+!.github/workflows/*.yml
+!renovate.json
+!nix/
+!nix/*.nix
+!scripts/
+!scripts/ci/
+!scripts/ci/*.sh
+!scripts/ci/*.py
+
 # Allow ALL in the containers folder
 !containers/
 !containers/*.nix
