@@ -1,0 +1,84 @@
+name: Infrastructure CI
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: infrastructure-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  configuration:
+    name: Repository checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: cachix/install-nix-action@75c75c31ebece974e48ebc36b4ad125bd97bd97b # v31
+        with:
+          extra_nix_config: |
+            accept-flake-config = false
+      - name: Check repository and both Caddy configurations
+        run: nix flake check --no-update-lock-file --print-build-logs
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+      - name: Validate Renovate configuration
+        run: npx --yes --package=renovate@44.199.0 renovate-config-validator --strict renovate.json
+      - name: Verify Renovate dependency extraction without updates
+        env:
+          LOG_LEVEL: debug
+          LOG_FORMAT: json
+        run: |
+          report=$(mktemp)
+          trap 'rm -f "$report"' EXIT
+          npx --yes --package=renovate@44.199.0 renovate \
+            --platform=local --dry-run=extract --onboarding=false --require-config=required > "$report"
+          python3 scripts/ci/check-renovate-extract.py "$report"
+
+  build:
+    name: Build ${{ matrix.target }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: homelab
+            output: nixosConfigurations.homelab.config.system.build.toplevel
+          - target: VPS
+            output: homeConfigurations.ubuntu.activationPackage
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: cachix/install-nix-action@75c75c31ebece974e48ebc36b4ad125bd97bd97b # v31
+        with:
+          extra_nix_config: |
+            accept-flake-config = false
+      - name: Build deployment output without activation
+        env:
+          OUTPUT: ${{ matrix.output }}
+        run: nix build --no-link --no-update-lock-file --print-build-logs ".#$OUTPUT"
+
+  required:
+    name: Required CI
+    if: always()
+    needs: [configuration, build]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Require every configuration check and deployment build
+        env:
+          CONFIGURATION_RESULT: ${{ needs.configuration.result }}
+          BUILD_RESULT: ${{ needs.build.result }}
+        run: test "$CONFIGURATION_RESULT" = success && test "$BUILD_RESULT" = success

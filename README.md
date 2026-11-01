@@ -9,6 +9,11 @@
 
 ## Overview
 
+Repository CI builds the homelab and VPS configurations without activating them.
+Renovate opens dependency update PRs with automatic merging disabled.
+See [repository checks and updates](docs/REPOSITORY_WORKFLOW.md) and the
+[deployment baseline](docs/BASELINE.md) before applying this repository to a host.
+
 This repository contains the Infrastructure as Code (IaC) configuration for the **Tonga** homelab and its public-facing gateway. The core philosophy of this project is **strict reproducibility**. By leveraging Nix flakes, every component of the server is defined in code.
 
 ### The Hybrid Challenge
