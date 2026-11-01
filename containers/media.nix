@@ -48,6 +48,28 @@ in {
     ];
   };
 
+  # Keep qBittorrent reachable when Proton VPN assigns a new incoming port.
+  systemd.services.qbittorrent-port-sync = {
+    description = "Sync qBittorrent with the VPN forwarded port";
+    after = [ "podman-gluetun.service" "podman-qbittorrent.service" ];
+    requisite = [ "podman-gluetun.service" "podman-qbittorrent.service" ];
+    path = [ pkgs.podman ];
+    serviceConfig = {
+      Type = "oneshot";
+      TimeoutStartSec = "30s";
+    };
+    script = builtins.readFile ./scripts/sync-qbittorrent-port.sh;
+  };
+
+  systemd.timers.qbittorrent-port-sync = {
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnBootSec = "2min";
+      OnUnitActiveSec = "1min";
+      Unit = "qbittorrent-port-sync.service";
+    };
+  };
+
   # --- Firewall ---
   # Allow the media containers to talk to the host (Required for DNS)
   networking.firewall.extraCommands = ''

@@ -17,6 +17,8 @@
 # Allow ALL in the containers folder
 !containers/
 !containers/*.nix
+!containers/scripts/
+!containers/scripts/sync-qbittorrent-port.sh
 !containers/foundryvtt/
 !containers/foundryvtt/*.nix
 !containers/pterodactyl/
