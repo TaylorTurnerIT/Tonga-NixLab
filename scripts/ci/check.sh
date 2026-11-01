@@ -8,7 +8,9 @@ while IFS= read -r -d '' script; do
 done < <(find . -name '*.sh' -type f -print0)
 
 while IFS= read -r -d '' expression; do
-    nix-instantiate --parse "$expression" >/dev/null
+    # Parsing needs no store. The dummy backend avoids initializing global
+    # profiles/state in a Linux build sandbox, where those paths are read-only.
+    nix-instantiate --store dummy:// --parse "$expression" >/dev/null
 done < <(find . -name '*.nix' -type f -print0)
 
 # Existing deployment scripts have lint debt; syntax is required for all scripts.
