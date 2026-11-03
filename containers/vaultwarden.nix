@@ -15,6 +15,7 @@
     ];
 
     environment = {
+      DOMAIN = "https://vault.tongatime.us";
       # Security settings
       SIGNUPS_ALLOWED = "false";
       INVITATIONS_ALLOWED = "true";
