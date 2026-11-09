@@ -78,7 +78,7 @@
     enable = true;
     # Use unstable pkgs for Caddy with Layer 4 plugin
     package = pkgs-unstable.caddy.withPlugins {
-      plugins = [ "github.com/mholt/caddy-l4@v0.0.0-20251124224044-66170bec9f4d" ];
+      plugins = [ "github.com/mholt/caddy-l4@v0.1.2" ];
       hash = "sha256-g3Ca24Boxb9VkSCrNvy1+n5Dfd2n4qEpi2bIOxyNc6g="; 
     };
 
