@@ -116,7 +116,7 @@ in {
 
     # --- VPN (Gluetun) ---
     gluetun = {
-      image = "qmcgaw/gluetun:v3.41.0";
+      image = "qmcgaw/gluetun:v3.41.3";
       autoStart = true;
       extraOptions = [ 
         "--network=${podmanNetwork}" 
