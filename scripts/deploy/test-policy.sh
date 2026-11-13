@@ -99,6 +99,7 @@ chmod +x "$test_root/bin/"*
 printf '%s\n' "$test_root/previous" > "$test_root/state/previous-system"
 : > "$test_root/state/pending"
 printf 'candidate\n' > "$test_root/state/candidate-sha"
+printf 'candidate\n' > "$test_root/state/deployed-sha"
 printf '%s\n' "$(( $(date +%s) + 3600 ))" > "$test_root/state/deadline"
 PATH="$test_root/bin:$PATH" TONGA_DEPLOY_STATE="$test_root/state" bash scripts/deploy/rollback-watchdog.sh
 [[ -e "$test_root/state/pending" ]]

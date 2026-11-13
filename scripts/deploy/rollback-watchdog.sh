@@ -23,7 +23,8 @@ healthy() {
 if (( $(date +%s) < $(cat "$state/deadline") )); then
   exit 0
 fi
-if healthy; then
+if [[ -s "$state/candidate-sha" && -s "$state/deployed-sha" ]] &&
+   [[ "$(cat "$state/candidate-sha")" == "$(cat "$state/deployed-sha")" ]] && healthy; then
   rm -f "$state/pending" "$state/previous-system" "$state/previous-system-root" "$state/deadline" "$state/candidate-sha"
   sync
   exit 0
