@@ -51,6 +51,11 @@ cat > "$test_root/previous/bin/switch-to-configuration" <<'MOCK'
 exit 0
 MOCK
 chmod +x "$test_root/bin/"* "$test_root/previous/bin/switch-to-configuration"
+# A failing service during the startup grace period must not cause rollback.
+printf '%s\n' "$(( $(date +%s) + 3600 ))" > "$test_root/state/deadline"
+PATH="$test_root/bin:$PATH" TONGA_DEPLOY_STATE="$test_root/state" bash scripts/deploy/rollback-watchdog.sh
+[[ -e "$test_root/state/pending" && -e "$test_root/state/deployed-sha" ]]
+printf '0\n' > "$test_root/state/deadline"
 printf 'stalled activation holds this deployment lock\n' > "$test_root/state/deploy.lock"
 exec 8>"$test_root/state/deploy.lock"
 PATH="$test_root/bin:$PATH" TONGA_DEPLOY_STATE="$test_root/state" bash scripts/deploy/rollback-watchdog.sh

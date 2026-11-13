@@ -20,11 +20,12 @@ healthy() {
     printf '%s' "$tailscale" | jq -e '.BackendState == "Running" and ((.Health // []) | length == 0)' >/dev/null
 }
 
+if (( $(date +%s) < $(cat "$state/deadline") )); then
+  exit 0
+fi
 if healthy; then
-  if (( $(date +%s) >= $(cat "$state/deadline") )); then
-    rm -f "$state/pending" "$state/previous-system" "$state/deadline"
-    sync
-  fi
+  rm -f "$state/pending" "$state/previous-system" "$state/previous-system-root" "$state/deadline" "$state/candidate-sha"
+  sync
   exit 0
 fi
 
