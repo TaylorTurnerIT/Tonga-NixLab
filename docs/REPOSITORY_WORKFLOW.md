@@ -95,13 +95,34 @@ rechecks both master and CI before building and immediately before activation.
 If either check fails or master moves, it exits without activation.
 
 The homelab builds the `nixosConfigurations.homelab` system locally before
-activation. Before switching, the service records the prior system generation
-and a five-minute health deadline under `/var/lib/tonga-auto-deploy`. A
-separate system timer checks Caddy's service and local admin API. If activation
-fails or health checks fail, it restores the recorded generation. The state
-and enabled timer survive network loss and reboot. The watchdog does not need
-GitHub or SSH. It checks local Caddy availability, not DNS, TLS, or every
-application.
+activation. The poller observes the current `master` SHA before activation and
+checks it again immediately before switching. GitHub cannot make this read and
+local activation atomic. A push can move `master` after the final read, so the
+deployed SHA is the last observed and CI-qualified revision, not a guarantee
+that it remains the branch head at switch time.
+
+Before switching, the service records the prior system generation and a
+five-minute health deadline under `/var/lib/tonga-auto-deploy`. It adds an
+indirect Nix GC root until recovery succeeds or the health deadline passes.
+This protects rollback even if normal generation garbage collection runs.
+Every network request, build, activation, service stop, and rollback has a
+timeout. The poller and watchdog have systemd runtime limits. The watchdog uses
+an independent lock, so a stalled poller cannot block it. It stops the poller
+before restoring the prior generation. Failed rollback leaves pending state
+and the GC root in place for its next 30-second attempt or next boot.
+
+The watchdog checks Caddy, Tailscale, Podman socket activation, Docker, SSH,
+the local Caddy admin API, and Tailscale's reported backend and health state.
+It waits for the five-minute deadline before accepting a healthy activation.
+These checks are practical service signals, not end-to-end application tests.
+They do not verify DNS, public TLS, every container, database integrity, remote
+peer reachability, or an immediate control-plane outage that Tailscale has not
+reported yet. The recovery service waits for `multi-user.target` after boot,
+but a host that remains unhealthy or cannot stop a process in an uninterruptible
+kernel wait still needs operator recovery. A failed health check triggers
+rollback. After a successful rollback, the failed SHA is removed from the
+deployed marker and the next poll may retry it. The state and enabled recovery
+timer survive network loss and reboot. The watchdog does not need GitHub or SSH.
 
 The host needs outbound HTTPS access to GitHub and the Nix build cache. No new
 credentials, inbound ports, DNS records, or live changes are part of this

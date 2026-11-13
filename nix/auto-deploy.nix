@@ -9,7 +9,7 @@ let
   };
   rollback = pkgs.writeShellApplication {
     name = "tonga-auto-deploy-rollback";
-    runtimeInputs = [ pkgs.coreutils pkgs.curl pkgs.nix pkgs.systemd pkgs.util-linux ];
+    runtimeInputs = [ pkgs.coreutils pkgs.curl pkgs.jq pkgs.nix pkgs.systemd pkgs.tailscale pkgs.util-linux ];
     text = builtins.readFile ../scripts/deploy/rollback-watchdog.sh;
   };
 in {
@@ -23,6 +23,8 @@ in {
       serviceConfig = {
         Type = "oneshot";
         ExecStart = "${deploy}/bin/tonga-auto-deploy";
+        RuntimeMaxSec = "20min";
+        TimeoutStopSec = "25s";
         StateDirectory = "tonga-auto-deploy";
         StateDirectoryMode = "0700";
         Environment = [ "TONGA_DEPLOY_STATE=/var/lib/tonga-auto-deploy" ];
@@ -41,9 +43,12 @@ in {
 
     systemd.services.tonga-auto-deploy-rollback = {
       description = "Recover an unhealthy automatic NixOS activation";
+      after = [ "multi-user.target" ];
       serviceConfig = {
         Type = "oneshot";
         ExecStart = "${rollback}/bin/tonga-auto-deploy-rollback";
+        RuntimeMaxSec = "2min";
+        TimeoutStopSec = "15s";
         StateDirectory = "tonga-auto-deploy";
         StateDirectoryMode = "0700";
         Environment = [ "TONGA_DEPLOY_STATE=/var/lib/tonga-auto-deploy" ];
