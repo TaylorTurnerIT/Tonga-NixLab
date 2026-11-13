@@ -76,6 +76,37 @@ Protect `master` with strict `Required CI`, pull requests, conversation resoluti
 and no force pushes or branch deletion. Apply the rules to administrators too.
 Automatic deployment and automatic merge remain disabled during this phase.
 
+## NixOS homelab pull deployment
+
+The NixOS homelab pull deployment is implemented and disabled by default.
+Enable `services.tongaAutoDeploy.enable` in `configuration.nix` only after
+reviewing the current host baseline and the recovery behavior below. The
+polling timer is enabled only when this option is true. The rollback timer is
+always enabled and does nothing when no deployment is pending. This keeps the
+recovery path independent of network access. This change does not run
+deployment, SSH, or host commands.
+
+The root poller reads the current `master` SHA, then accepts only a completed,
+successful `Infrastructure CI` workflow run for that exact SHA. It checks the
+workflow path, push event, master branch, run attempt, and every job result.
+The GitHub jobs API total must match the returned job count. A check with the
+right name alone does not qualify. The poller fetches the exact commit and
+rechecks both master and CI before building and immediately before activation.
+If either check fails or master moves, it exits without activation.
+
+The homelab builds the `nixosConfigurations.homelab` system locally before
+activation. Before switching, the service records the prior system generation
+and a five-minute health deadline under `/var/lib/tonga-auto-deploy`. A
+separate system timer checks Caddy's service and local admin API. If activation
+fails or health checks fail, it restores the recorded generation. The state
+and enabled timer survive network loss and reboot. The watchdog does not need
+GitHub or SSH. It checks local Caddy availability, not DNS, TLS, or every
+application.
+
+The host needs outbound HTTPS access to GitHub and the Nix build cache. No new
+credentials, inbound ports, DNS records, or live changes are part of this
+implementation. Existing manual deployment scripts remain unchanged.
+
 Before enabling automatic activation, reconcile every difference recorded in
 [the baseline](BASELINE.md). Do not replace the running configuration with this
 older repository snapshot merely because CI passes.

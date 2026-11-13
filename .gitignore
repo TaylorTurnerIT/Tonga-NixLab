@@ -25,6 +25,8 @@
 !scripts/ci/
 !scripts/ci/*.sh
 !scripts/ci/*.py
+!scripts/deploy/
+!scripts/deploy/*.sh
 
 # Allow ALL in the containers folder
 !containers/

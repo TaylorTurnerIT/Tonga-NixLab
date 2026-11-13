@@ -37,6 +37,7 @@
         ./disko-config.nix
         ./configuration.nix
         sops-nix.nixosModules.sops
+        ./nix/auto-deploy.nix
       ];
     };
 

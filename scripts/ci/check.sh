@@ -17,6 +17,7 @@ done < <(find . -name '*.nix' -type f -print0)
 # actionlint checks workflow commands without imposing new lint rules on them.
 actionlint -shellcheck='' .github/workflows/*.yml
 python3 scripts/ci/check-secrets.py
+bash scripts/deploy/test-policy.sh
 
 work_dir=$(mktemp -d)
 trap 'rm -rf "$work_dir"' EXIT
